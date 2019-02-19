@@ -16,12 +16,14 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
+import collectableItems.Collectable;
+
 
 class TableModelComboHeader extends AbstractTableModel implements TableModel, ActionListener {
 	
 	private static final long serialVersionUID = 1L;
 	CollectionsApp application;
-	Collection<?> collection;
+	Collectable<?> collection;
 	JTable table;
 	private TableModelCollection tableModel;
 	private JComboBox<String> combo1, combo2, combo3, combo4, combo5;

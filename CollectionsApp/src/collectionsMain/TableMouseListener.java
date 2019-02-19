@@ -6,6 +6,8 @@ import java.awt.event.MouseEvent;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 
+import collectableItems.Collectable;
+
 
 public class TableMouseListener extends MouseAdapter {
 	
@@ -13,11 +15,11 @@ public class TableMouseListener extends MouseAdapter {
 	private CollectionsApp frame;
 	private JTable table;
 	private JPopupMenu popupMenu;
-	private Collection<?> collection;
+	private Collectable<?> collection;
 	private Point point;
 	
 	
-	public TableMouseListener (CollectionsApp frame, JTable table, Collection<?> collection){
+	public TableMouseListener (CollectionsApp frame, JTable table, Collectable<?> collection){
 		
 		this.frame = (CollectionsApp) frame;
 		this.table = table;

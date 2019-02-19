@@ -10,10 +10,11 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-import books.BooksCollection;
+
+import collectableItems.Collectable;
 import games.GamesCollection;
+import mediaMusic.MusicCollection;
 import movies.MoviesCollection;
-import music.MusicCollection;
 
 public class ImportAccessory extends JPanel implements PropertyChangeListener {
 
@@ -21,10 +22,10 @@ public class ImportAccessory extends JPanel implements PropertyChangeListener {
 	
 	private String collectionsName, info;
 	private JLabel fileLabel, iconLabel, infoLabel;
-	private Collection<?> collection, newCollection;
+	private Collectable<?> collection, newCollection;
 	boolean isHome, isBooksCollection, isMusicCollection, isMoviesCollection, isGamesCollection, anyCollection;
 	
-	public ImportAccessory (Collection<?> dataBase, boolean homeFlag) {
+	public ImportAccessory (Collectable<?> dataBase, boolean homeFlag) {
 		setPreferredSize(new Dimension(150, 150));
 		collection = dataBase;
 		collectionsName = dataBase.getItemName();
@@ -52,8 +53,8 @@ public class ImportAccessory extends JPanel implements PropertyChangeListener {
 				try {
 					newCollection = collection.loadCollection(file);
 					if(newCollection == null) {
-						if(BooksCollection.isValidDatabase(file)){
-							newCollection = new BooksCollection(file);
+						if(DataBase.isValidDatabase(file)){
+							newCollection = new DataBase(file);
 							iconLabel.setIcon(newCollection.getIcon());
 							infoLabel.setText("<html>"+info+"It's "+newCollection.getItemName()+" collection with "+newCollection.sizeOfDB()+" elements </html>");
 							isBooksCollection = true;

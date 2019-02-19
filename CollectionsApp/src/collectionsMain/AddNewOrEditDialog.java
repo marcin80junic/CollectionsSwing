@@ -21,7 +21,9 @@ import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
-import music.AudioCD;
+
+import collectableItems.AudioCD;
+import collectableItems.Collectable;
 
 public class AddNewOrEditDialog extends JDialog {
 
@@ -39,7 +41,7 @@ public class AddNewOrEditDialog extends JDialog {
 	private boolean isAudio;
 	
 	
-	AddNewOrEditDialog (CollectionsApp frame, JTable table, Collection<?> dataBase) {
+	AddNewOrEditDialog (CollectionsApp frame, JTable table, Collectable<?> dataBase) {
 		
 		setTitle("Add New "+dataBase.getItemName());
 		numOfVar = table.getColumnCount()-1;
@@ -241,7 +243,7 @@ public class AddNewOrEditDialog extends JDialog {
 
 	}
 	
-	AddNewOrEditDialog (CollectionsApp frame, JTable table, Collection<?> dataBase, int index) {
+	AddNewOrEditDialog (CollectionsApp frame, JTable table, Collectable<?> dataBase, int index) {
 		
 		setTitle("Edit "+dataBase.getItemName());
 		setLayout(new GridBagLayout());

@@ -8,28 +8,29 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.filechooser.FileView;
-import books.Book;
-import books.BooksCollection;
-import games.Game;
+
+import collectableItems.AudioCD;
+import collectableItems.Book;
+import collectableItems.Collectable;
+import collectableItems.Game;
+import collectableItems.Movie;
 import games.GamesCollection;
-import movies.Movie;
+import mediaMusic.MusicCollection;
 import movies.MoviesCollection;
-import music.AudioCD;
-import music.MusicCollection;
 
 
 public class CollectionsThumbNailView extends FileView {
 
 	
-	private Collection<Book> books;
-	private Collection<Game> games;
-	private Collection<Movie> movies;
-	private Collection<AudioCD> music;
+	private Collectable<Book> books;
+	private Collectable<Game> games;
+	private Collectable<Movie> movies;
+	private Collectable<AudioCD> music;
 	private Component observer;
 	
 	
 	public CollectionsThumbNailView(Component c) {
-		books = new BooksCollection();
+		books = new DataBase();
 		games = new GamesCollection();
 		movies = new MoviesCollection();
 		music = new MusicCollection();

@@ -1,4 +1,4 @@
-package books;
+package mediaBooks;
 
 
 import javax.swing.JTextPane;

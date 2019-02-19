@@ -1,4 +1,4 @@
-package music;
+package mediaMusic;
 
 import java.awt.Color;
 import java.awt.Dimension;

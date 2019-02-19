@@ -1,4 +1,4 @@
-package music;
+package mediaMusic;
 
 import java.io.File;
 

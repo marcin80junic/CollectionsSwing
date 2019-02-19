@@ -62,11 +62,10 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
-import books.*;
-import games.*;
-import item.ItemCollection;
-import movies.*;
-import music.*;
+import collectableItems.Book;
+import collectableItems.Collectable;
+import mediaBooks.*;
+import mediaMusic.*;
 
 public class CollectionsApp extends JFrame implements ListSelectionListener  {
 	
@@ -80,7 +79,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 	private JButton btnHome, btnBooks, btnMusic, btnMovies, btnGames;
 	private JButton[] navigationButtons;
 	private JTable table, headerTable;
-	private TableModelCollection tableModel;
+	private TableModelCollection <? extends DataBase<?>, Collectable> tableModel;
 	private TableModelComboHeader headerModel;
 	private TableColumnModel headerColumnModel;
 	private JScrollPane tableScroll;
@@ -92,7 +91,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 	private Border lowered, raised;
 	private TableMouseListener mice;
 	private ListSelectionModel listSelectionModel;
-	private Collection<?> collection, itemCollection, booksCollection, gamesCollection, moviesCollection, musicCollection;
+	private Collectable collection, booksCollection, gamesCollection, moviesCollection, musicCollection;
 	private CollectionsAction addAction, editAction, removeAction, upAction, downAction, clearAction, resetAction, findAction,
 			displayPopupMenuAction,	exitAction, helpAction,
 			importAction, exportAction, settingsAction, homeAction, booksAction, audioAction, gamesAction, moviesAction;
@@ -110,7 +109,6 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 		setPreferredSize(new Dimension(940, 500));
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 	
-		itemCollection = new ItemCollection();
 		collection = itemCollection;
 		homeFlag = true;
 		propertiesLoad();
@@ -791,7 +789,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 		}
 	}
 	
-	Collection<?> getCollection() {	return collection; }
+	Collectable<?> getCollection() {	return collection; }
 	String getSearchText() { return search;	}
 	
 	Color getMainBackground() { return mainBackground; }
@@ -828,7 +826,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 	}
 	
 	
-	boolean areOtherCollectionsChanged(Collection<?> collection) {
+	boolean areOtherCollectionsChanged(Collectable<?> collection) {
 		
 		boolean books, audio, games, movies;
 		books = audio = games = movies = false;
@@ -1129,8 +1127,8 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 				if(option == JFileChooser.APPROVE_OPTION) {
 					File imported = imp.getSelectedFile();
 					try {
-						if(ia.getCollectionsName().equals(BooksCollection.getName())) {
-							booksCollection = new BooksCollection(imported);
+						if(ia.getCollectionsName().equals(DataBase.getName())) {
+							booksCollection = new DataBase(imported);
 							btnBooks.doClick();
 						} else if(ia.getCollectionsName().equals(GamesCollection.getName())) {
 							gamesCollection = new GamesCollection(imported);
@@ -1160,7 +1158,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 			else if(ae.getActionCommand().equals("books")) {
 				btnBooks.setBorder(lowered);
 				btnBooks.setBackground(btnBooks.getBackground().darker());
-				if(booksCollection == null) booksCollection = new BooksCollection();
+				if(booksCollection == null) booksCollection = new DataBase();
 				collection = booksCollection;
 				resetBtnFlags();
 				booksFlag = true;
