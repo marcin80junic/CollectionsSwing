@@ -7,6 +7,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
+import javax.swing.JTable;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 
 public class AppProperties extends Properties {
 
@@ -20,8 +23,7 @@ public class AppProperties extends Properties {
 	public static final int TABLE_FOREGROUND = 5;
 	public static final int HIGHLIGHT_BACKGROUND = 6;
 	public static final int HIGHLIGHT_FOREGROUND = 7;
-	
-	protected final int COLORS_COUNT = 8;
+	protected static final int COLORS_COUNT = 8;
 	
 	public static final int MAIN_FONT_FAMILY = 8;
 	public static final int MAIN_FONT_BOLD = 9;
@@ -35,15 +37,21 @@ public class AppProperties extends Properties {
 	public static final int HIGHLIGHT_FONT_FAMILY = 17;
 	public static final int HIGHLIGHT_FONT_BOLD = 18;
 	public static final int HIGHLIGHT_FONT_ITALIC = 19;
+	protected static final int FONTS_PROP_COUNT = 12;
 	
-	protected final int FONTS_PROP_COUNT = 12;
+	public static final int BOOKS_COLUMN_SIZES = 20;
+	public static final int GAMES_COLUMN_SIZES = 21;
+	public static final int MOVIES_COLUMN_SIZES = 22;
+	public static final int MUSIC_COLUMN_SIZES = 23;
+	protected static final int COLUMN_SIZES_COUNT = 4;
 	
-	protected final int PROPERTIES_COUNT = 20;
+	protected static final int PROPERTIES_COUNT = 24;
 	
 	protected final String[] KEYS = {"main.background", "main.foreground", "welcome.background", "welcome.foreground", "table.background",
 			"table.foreground", "highlight.background", "highlight.foreground", "main.font.family", "main.font.bold", "main.font.italic", 
 			"welcome.font.family", "welcome.font.bold", "welcome.font.italic", "table.font.family", "table.font.bold", "table.font.italic",
-			"highlight.font.family", "highlight.font.bold", "highlight.font.italic"};
+			"highlight.font.family", "highlight.font.bold", "highlight.font.italic", "books.column.sizes", "games.column.sizes",
+			"movies.column.sizes", "music.column.sizes"};
 	
 	private final File XML_FILE = new File("properties.xml");
 	private final File DEF_XML_FILE = new File("defaults.xml");
@@ -76,11 +84,21 @@ public class AppProperties extends Properties {
 			}
 			String[] defFonts = new String[FONTS_PROP_COUNT];
 			for(int i=0; i<defFonts.length; i++) {
-				if(i == MAIN_FONT_FAMILY || i== WELCOME_FONT_FAMILY || i == TABLE_FONT_FAMILY || i == HIGHLIGHT_FONT_FAMILY)
+				int j = COLORS_COUNT+i;
+				if(j == MAIN_FONT_FAMILY || j== WELCOME_FONT_FAMILY || j == TABLE_FONT_FAMILY || j == HIGHLIGHT_FONT_FAMILY)
 					defFonts[i] = "serif";
-				if(i == WELCOME_FONT_BOLD || i == HIGHLIGHT_FONT_ITALIC || i == HIGHLIGHT_FONT_BOLD) defFonts[i] = "true";
+				if(j == WELCOME_FONT_BOLD || j == HIGHLIGHT_FONT_ITALIC || j == HIGHLIGHT_FONT_BOLD) defFonts[i] = "true";
 				else defFonts[i] = "false";
-				defaults.put(KEYS[COLORS_COUNT+i], defFonts[i]);
+				defaults.put(KEYS[j], defFonts[i]);
+			}
+			String[] defColumns = new String[COLUMN_SIZES_COUNT];
+			for(int i=0; i<defColumns.length; i++) {
+				int j = COLORS_COUNT+FONTS_PROP_COUNT+i;
+				if(j == BOOKS_COLUMN_SIZES) defColumns[i] = "200,220,200,100,45";
+				if(j == GAMES_COLUMN_SIZES) defColumns[i] = "200,200,150,200,45";
+				if(j == MOVIES_COLUMN_SIZES) defColumns[i] = "200,200,150,200,45";
+				if(j == MUSIC_COLUMN_SIZES) defColumns[i] = "200,220,45,200,45";
+				defaults.put(KEYS[j], defColumns[i]);
 			}
 			try(FileOutputStream out = new FileOutputStream(DEF_XML_FILE)){
 				defaults.storeToXML(out, "defaults");
@@ -107,12 +125,34 @@ public class AppProperties extends Properties {
 	}
 	
 	public Font getFont(int fontFamily) {
-		if(fontFamily != MAIN_FONT_FAMILY || fontFamily != WELCOME_FONT_FAMILY || fontFamily != TABLE_FONT_FAMILY || 
+		if(fontFamily != MAIN_FONT_FAMILY && fontFamily != WELCOME_FONT_FAMILY && fontFamily != TABLE_FONT_FAMILY && 
 				fontFamily != HIGHLIGHT_FONT_FAMILY) throw new IllegalArgumentException("property is invalid");
 		String fontName = getProperty(KEYS[fontFamily]);
 		boolean isBold = getProperty(KEYS[fontFamily+1]).equals("true");
 		boolean isItalic = getProperty(KEYS[fontFamily+2]).equals("true");
 		return new Font(fontName, (isBold? Font.BOLD: 0 ) | (isItalic? Font.ITALIC: 0), 12);
+	}
+	
+	public void setColumnSizes(int columnSizes, JTable table) {
+		if(columnSizes != BOOKS_COLUMN_SIZES && columnSizes != GAMES_COLUMN_SIZES && columnSizes != MOVIES_COLUMN_SIZES &&
+				columnSizes != MUSIC_COLUMN_SIZES) throw new IllegalArgumentException("property is invalid");
+		String[] columns = getProperty(KEYS[columnSizes]).split(",");
+		TableColumnModel model = table.getColumnModel();
+		TableColumn column = null;
+		for(int i=0; i<columns.length; i++) {
+			column = model.getColumn(i);
+			if(i == 0) {
+				if(table.getRowCount() < 10) column.setMaxWidth(15);
+				else if(table.getRowCount() < 100) column.setPreferredWidth(25);
+				else if(table.getRowCount() < 1000) column.setPreferredWidth(35);
+				else if(table.getRowCount() < 10000) column.setPreferredWidth(45);
+			} else if(i == columns.length-1) {
+				column.setMinWidth(Integer.valueOf(columns[i-1]));
+				column.setMaxWidth(Integer.valueOf(columns[i-1]));
+			} else {
+				column.setPreferredWidth(Integer.valueOf(columns[i-1]));
+			}
+		}
 	}
 	
 	public void removeProperty(int key) {

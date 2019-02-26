@@ -21,7 +21,7 @@ import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
-
+import collectableItems.AbstractItem;
 import collectableItems.AudioCD;
 import collectableItems.Collectable;
 
@@ -41,11 +41,11 @@ public class AddNewOrEditDialog extends JDialog {
 	private boolean isAudio;
 	
 	
-	AddNewOrEditDialog (CollectionsApp frame, JTable table, Collectable<?> dataBase) {
+	AddNewOrEditDialog (CollectionsApp frame, JTable table, DataBase<? extends Collectable<? extends AbstractItem>> dataBase) {
 		
-		setTitle("Add New "+dataBase.getItemName());
+		setTitle("Add New "+dataBase.getName());
 		numOfVar = table.getColumnCount()-1;
-		isAudio = dataBase.getItemName().equals("AudioCD");
+		isAudio = dataBase.getName().equals("AudioCD");
 		if(isAudio) {
 			numOfVar++;
 			cdsInit();
@@ -53,10 +53,10 @@ public class AddNewOrEditDialog extends JDialog {
 		}
 		setLayout(new GridBagLayout());
 		
-		genre = new JComboBox<String>(dataBase.getGenreList());
+		genre = new JComboBox<String>(dataBase.getGenres());
 		getYearSpinner();
 		
-		JLabel title = new JLabel("Add a new "+dataBase.getItemName()+":");
+		JLabel title = new JLabel("Add a new "+dataBase.getName()+":");
 		title.setFont(title.getFont().deriveFont(Font.BOLD));
 		GridBagConstraints ll = new GridBagConstraints();
 		ll.gridy = 0;
@@ -194,7 +194,7 @@ public class AddNewOrEditDialog extends JDialog {
 			else if (varName5.equals("Year")) {
 				add(year, ty);
 			}
-			else if(dataBase.getItemName().equals("AudioCD")) {
+			else if(dataBase.getName().equals("AudioCD")) {
 				add(numOfCds, ty);
 				GridBagConstraints tp = new GridBagConstraints();
 				tp.gridx = 0; tp.gridy = 6;
@@ -213,8 +213,7 @@ public class AddNewOrEditDialog extends JDialog {
 		btnSave.setPreferredSize(new Dimension(73, 26));
 		btnSave.addActionListener((ae) -> {
 			try {
-				dataBase.addNewItem(getData());
-				((TableModelCollection) table.getModel()).addElement(dataBase.getItem(dataBase.sizeOfDB()-1));
+				((TableModelCollection<?>) table.getModel()).createItem(getData());
 				frame.saveAction.setEnabled(true);
 				frame.saveAllAction.setEnabled(true);
 				setVisible(false);
@@ -243,22 +242,22 @@ public class AddNewOrEditDialog extends JDialog {
 
 	}
 	
-	AddNewOrEditDialog (CollectionsApp frame, JTable table, Collectable<?> dataBase, int index) {
+	AddNewOrEditDialog (CollectionsApp frame, JTable table, DataBase<?> dataBase, int index) {
 		
-		setTitle("Edit "+dataBase.getItemName());
+		setTitle("Edit "+dataBase.getName());
 		setLayout(new GridBagLayout());
 		numOfVar = table.getColumnCount()-1;
-		isAudio = dataBase.getItemName().equals("AudioCD");
+		isAudio = dataBase.getName().equals("AudioCD");
 		if(isAudio) {
 			numOfVar++;
 			cdsInit();
 			tracksPanelInit();
 		}
 		
-		genre = new JComboBox<String>(dataBase.getGenreList());
+		genre = new JComboBox<String>(dataBase.getGenres());
 		getYearSpinner();
 	
-		JLabel title = new JLabel("Edit a(n) "+dataBase.getItemName()+":");
+		JLabel title = new JLabel("Edit a(n) "+dataBase.getName()+":");
 		title.setFont(title.getFont().deriveFont(Font.BOLD));
 		GridBagConstraints lt = new GridBagConstraints();
 		lt.gridy = 0;
@@ -415,9 +414,9 @@ public class AddNewOrEditDialog extends JDialog {
 				year.setValue(Integer.parseInt((String) dataBase.getTableModel().getValueAt(index, 5)));
 				add(year, t5);
 			}
-			else if(dataBase.getItemName().equals("AudioCD")) {
+			else if(dataBase.getName().equals("AudioCD")) {
 				int row = table.convertRowIndexToModel(table.getSelectedRow());
-				AudioCD cd = (AudioCD) dataBase.getTableModel().getElement(row);
+				AudioCD cd = (AudioCD) dataBase.getTableModel().getItem(row);
 				setCdsValues(cd);
 				add(numOfCds, t5);
 				GridBagConstraints tp = new GridBagConstraints();
@@ -440,11 +439,9 @@ public class AddNewOrEditDialog extends JDialog {
 		btnSave.addActionListener((ae) -> {
 			try {
 				int row = table.convertRowIndexToModel(table.getSelectedRow());
-				dataBase.editItem(row, getData());
-				((TableModelCollection) table.getModel()).editElement(row, dataBase.getItem(row));
+				((TableModelCollection<?>) table.getModel()).editItem(row, getData());
 				frame.saveAction.setEnabled(true);
 				frame.saveAllAction.setEnabled(true);
-				frame.detailPaneUpdate();
 				setVisible(false);
 			} catch (NumberFormatException nfe) { displayWarning(); }
 		});
@@ -521,7 +518,7 @@ public class AddNewOrEditDialog extends JDialog {
 	}
 	
 	private void setCdsValues(AudioCD cd) {
-		int[] num = cd.getAlbumCds();
+		int[] num = cd.getDiscs();
 		numOfCds.setValue(num.length);
 		
 		for(int i=0; i<num.length; i++) {

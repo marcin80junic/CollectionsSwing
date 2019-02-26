@@ -16,6 +16,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
+import collectableItems.AbstractItem;
 import collectableItems.Collectable;
 
 
@@ -23,18 +24,18 @@ class TableModelComboHeader extends AbstractTableModel implements TableModel, Ac
 	
 	private static final long serialVersionUID = 1L;
 	CollectionsApp application;
-	Collectable<?> collection;
+	DataBase<? extends Collectable<? extends AbstractItem>> dataBase;
 	JTable table;
-	private TableModelCollection tableModel;
+	private TableModelCollection<? extends Collectable<? extends AbstractItem>> tableModel;
 	private JComboBox<String> combo1, combo2, combo3, combo4, combo5;
 	private DefaultComboBoxModel<String> combo1Model, combo2Model, combo3Model, combo4Model, combo5Model;
 	private boolean combo1Flag = false, combo2Flag = false, combo3Flag = false, combo4Flag = false, combo5Flag = false;
 	private String combo1Selection, combo2Selection, combo3Selection, combo4Selection, combo5Selection;
 	
 	
-	public TableModelComboHeader(CollectionsApp application, JTable table) {
+	public TableModelComboHeader(CollectionsApp app, JTable table) {
 		
-		this.application = application;
+		application = app;
 		this.table = table;
 		comboInit();
 	}
@@ -105,13 +106,13 @@ class TableModelComboHeader extends AbstractTableModel implements TableModel, Ac
 	private void saveComboFlags() {
 		
 		boolean[] flags = {combo1Flag, combo2Flag, combo3Flag, combo4Flag, combo5Flag};
-		collection.setComboFlags(flags);
+		dataBase.setComboFlags(flags);
 	}
 	
 	
 	private void updateComboFlags() {
 		
-		boolean[] flags = collection.getComboFlags();
+		boolean[] flags = dataBase.getComboFlags();
 		for(int i=0; i<flags.length; i++) {
 			switch(i) {
 			case 0: combo1Flag = flags[i];
@@ -156,10 +157,10 @@ class TableModelComboHeader extends AbstractTableModel implements TableModel, Ac
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	void updateComboLists() {
 		
-		collection = application.getCollection();
+		dataBase = application.getDataBase();
 		tableModel = (TableModelCollection) table.getModel();
 		
-		String[] comboHeaders = collection.getComboHeaders();
+		String[] comboHeaders = dataBase.getComboHeaders();
 		String[] combo1List = new String[tableModel.getRowCount()+1];
 		String[] combo2List = new String[tableModel.getRowCount()+1];
 		String[] combo3List = new String[tableModel.getRowCount()+1];
@@ -247,10 +248,11 @@ class TableModelComboHeader extends AbstractTableModel implements TableModel, Ac
 		updateComboFlags();
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void comboSelected(int comboNumber, String selection) {
 		
-		tableModel = (TableModelCollection) table.getModel();
-		collection = application.getCollection();
+		tableModel = (TableModelCollection<? extends Collectable<? extends AbstractItem>>) table.getModel();
+		dataBase = application.getDataBase();
 		
 		int size, size2 = 0;
 		int numOfVar = tableModel.getColumnCount()-1;
@@ -259,7 +261,7 @@ class TableModelComboHeader extends AbstractTableModel implements TableModel, Ac
 		size = tableModel.getRowCount()-1;
 		for(int i=size; i>=0; i--) {
 			if(!tableModel.getValueAt(i, comboNumber).equals(selection)){
-				tableModel.removeElement(i);
+				tableModel.removeItem(i);
 			}
 		}
 		size = tableModel.getRowCount()-1;
@@ -314,46 +316,56 @@ class TableModelComboHeader extends AbstractTableModel implements TableModel, Ac
 			}
 		}
 		application.saveAction.setEnabled(false);
-		collection.setFilteredStatus(true);
-		if(!application.areOtherCollectionsChanged(collection)) application.saveAllAction.setEnabled(false);
+		tableModel.setFiltered(true);
+		if(!application.areOtherCollectionsChanged(dataBase)) application.saveAllAction.setEnabled(false);
 	}
 	
 	private void comboUnselected() {
-		
-		tableModel.reloadTableModel();
-		tableModel = (TableModelCollection) table.getModel();
-		
-		
+		tableModel = tableModel.reloadTableModel();
 		if(combo1Flag) {
 			for(int i=tableModel.getRowCount()-1; i>=0; i--) {
-				if(!tableModel.getValueAt(i, 1).equals(combo1Selection)) tableModel.removeElement(i);
+				if(!tableModel.getValueAt(i, 1).equals(combo1Selection)) {
+					tableModel.removeItem(i);
+					tableModel.setFiltered(true);
+				}
 			}
 		}
 		if(combo2Flag) {
 			for(int i=tableModel.getRowCount()-1; i>=0; i--) {
-				if(!tableModel.getValueAt(i, 2).equals(combo2Selection)) tableModel.removeElement(i);
+				if(!tableModel.getValueAt(i, 2).equals(combo2Selection)) {
+					tableModel.removeItem(i);
+					tableModel.setFiltered(true);
+				}
 			}
 		}
 		if(combo3Flag) {
 			for(int i=tableModel.getRowCount()-1; i>=0; i--) {
-				if(!tableModel.getValueAt(i, 3).equals(combo3Selection)) tableModel.removeElement(i);
+				if(!tableModel.getValueAt(i, 3).equals(combo3Selection)) {
+					tableModel.removeItem(i);
+					tableModel.setFiltered(true);
+				}
 			}
 		}
 		if(combo4Flag) {
 			for(int i=tableModel.getRowCount()-1; i>=0; i--) {
-				if(!tableModel.getValueAt(i, 4).equals(combo4Selection)) tableModel.removeElement(i);
+				if(!tableModel.getValueAt(i, 4).equals(combo4Selection)) {
+					tableModel.removeItem(i);
+					tableModel.setFiltered(true);
+				}
 			}
 		}
 		if(combo5Flag) {
 			for(int i=tableModel.getRowCount()-1; i>=0; i--) {
-				if(!tableModel.getValueAt(i, 5).equals(combo5Selection)) tableModel.removeElement(i);
+				if(!tableModel.getValueAt(i, 5).equals(combo5Selection)) {
+					tableModel.removeItem(i);
+					tableModel.setFiltered(true);
+				}
 			}
 		}
 		saveComboFlags();
 		updateComboLists();
 		application.initHeaderRenderers();
 	}
-	
 	
 	public static String[] removeDuplicates(String[] array) {
 		Set<String> uniqueSetArray = new LinkedHashSet<>(Arrays.asList(array));
@@ -373,8 +385,7 @@ class TableModelComboHeader extends AbstractTableModel implements TableModel, Ac
 		}
 		return uniqueArray;	
 	}
-
-
+	
 	@Override
 	public void actionPerformed(ActionEvent ae) {
 		

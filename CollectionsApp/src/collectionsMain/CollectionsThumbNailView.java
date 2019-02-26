@@ -8,32 +8,21 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.filechooser.FileView;
-
 import collectableItems.AudioCD;
 import collectableItems.Book;
 import collectableItems.Collectable;
 import collectableItems.Game;
 import collectableItems.Movie;
-import games.GamesCollection;
-import mediaMusic.MusicCollection;
-import movies.MoviesCollection;
-
 
 public class CollectionsThumbNailView extends FileView {
 
 	
-	private Collectable<Book> books;
-	private Collectable<Game> games;
-	private Collectable<Movie> movies;
-	private Collectable<AudioCD> music;
+	private DataBase<? extends Collectable> dataBase;
 	private Component observer;
 	
 	
 	public CollectionsThumbNailView(Component c) {
-		books = new DataBase();
-		games = new GamesCollection();
-		movies = new MoviesCollection();
-		music = new MusicCollection();
+		dataBase = new DataBase<>();
 		observer = c;
 	}
 	
@@ -56,18 +45,8 @@ public class CollectionsThumbNailView extends FileView {
 	public Icon getIcon(File f) {
 		
 		if(f.isDirectory()) return FileSystemView.getFileSystemView().getSystemIcon(f);
-		
-		if(books.loadCollection(f) != null) {
-			return new Icon16(books.createImageIcon("/icons/Books.png", "books"));
-		}
-		if(games.loadCollection(f) != null) {
-			return new Icon16(games.createImageIcon("/icons/Games.png", "games"));
-		}
-		if(movies.loadCollection(f) != null) {
-			return new Icon16(movies.createImageIcon("/icons/Movies.png", "movies"));
-		}
-		if(music.loadCollection(f) != null) {
-			return new Icon16(music.createImageIcon("/icons/music.png", "music"));
+		if(dataBase.loadCollection(f) != null) {
+			return new Icon16(dataBase.createImageIcon("/icons/Books.png", "books"));
 		}
 		return FileSystemView.getFileSystemView().getSystemIcon(f);
 	}
@@ -76,6 +55,7 @@ public class CollectionsThumbNailView extends FileView {
 	public Boolean isTraversable(File f) {
 		return super.isTraversable(f);
 	}
+	
 	
 	public class Icon16 extends ImageIcon {
 		

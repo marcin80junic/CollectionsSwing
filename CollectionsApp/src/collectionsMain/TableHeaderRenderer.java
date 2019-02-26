@@ -12,14 +12,13 @@ import javax.swing.JTable;
 import javax.swing.border.BevelBorder;
 import javax.swing.table.TableCellRenderer;
 
-
 public class TableHeaderRenderer extends JPanel implements TableCellRenderer {
 
 
 	private static final long serialVersionUID = 1L;
 	private CollectionsApp app;
 	private JLabel title, icon;
-	private SorterIcon ascIcon, descIcon;
+	//private SorterIcon ascIcon, descIcon;
 	private boolean isAsc;
 
 
@@ -30,8 +29,8 @@ public class TableHeaderRenderer extends JPanel implements TableCellRenderer {
 		icon = new JLabel();
 		icon.setPreferredSize(new Dimension(12,24));
 		title.setHorizontalAlignment(JLabel.CENTER);
-		ascIcon = new SorterIcon(true);
-		descIcon = new SorterIcon(false);
+		//ascIcon = new SorterIcon(true);
+		//descIcon = new SorterIcon(false);
 		setLayout(new BorderLayout());
 		setPreferredSize(new Dimension(0, 24));
 		setBorder(BorderFactory.createSoftBevelBorder(BevelBorder.RAISED));
@@ -39,11 +38,11 @@ public class TableHeaderRenderer extends JPanel implements TableCellRenderer {
 		add(icon, BorderLayout.LINE_END);
 	}
 	
-	
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 			int row, int column) {
 		
+		//TableModelCollection<?> model = (TableModelCollection<?>) table.getModel();
 		title.setText(value.toString());
 		title.setFont(app.getMainFont());
 		title.setForeground(app.getMainForeground());
@@ -51,23 +50,22 @@ public class TableHeaderRenderer extends JPanel implements TableCellRenderer {
 			remove(icon);
 			return this;
 		}
-		else if(column == TableModelCollection.getAscendingSortedColumnIndex()) {
+	/*	else if(column == model.getAscending()) {
 			icon.setIcon(ascIcon);
 			isAsc = true;
 		}
-		else if(column == TableModelCollection.getDescendingSortedColumnIndex()) {
+		else if(column == model.getDescending()) {
 			icon.setIcon(descIcon);
 			isAsc = false;
 		}
 		else {
 			icon.setIcon(null);
 			isAsc = false;
-		}
+		}*/
 		return this;
 	}
 	
 	public boolean isAscIcon() { return isAsc; }
-	
 	
 	
 	class SorterIcon implements Icon {

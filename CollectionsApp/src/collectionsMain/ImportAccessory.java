@@ -10,11 +10,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-
 import collectableItems.Collectable;
-import games.GamesCollection;
-import mediaMusic.MusicCollection;
-import movies.MoviesCollection;
 
 public class ImportAccessory extends JPanel implements PropertyChangeListener {
 
@@ -22,13 +18,13 @@ public class ImportAccessory extends JPanel implements PropertyChangeListener {
 	
 	private String collectionsName, info;
 	private JLabel fileLabel, iconLabel, infoLabel;
-	private Collectable<?> collection, newCollection;
+	private DataBase<? extends Collectable> dataBase, newDB;
 	boolean isHome, isBooksCollection, isMusicCollection, isMoviesCollection, isGamesCollection, anyCollection;
 	
-	public ImportAccessory (Collectable<?> dataBase, boolean homeFlag) {
+	public ImportAccessory (DataBase<? extends Collectable> dB, boolean homeFlag) {
 		setPreferredSize(new Dimension(150, 150));
-		collection = dataBase;
-		collectionsName = dataBase.getItemName();
+		dataBase = dB;
+		collectionsName = dataBase.getName();
 		isHome = homeFlag;
 		info = isHome?  "" : "This isn't " +collectionsName+" collection! ";
 		setLayout(new BorderLayout());
@@ -51,27 +47,27 @@ public class ImportAccessory extends JPanel implements PropertyChangeListener {
 			if(file != null) {
 				fileLabel.setText("File Name: "+file.getName());
 				try {
-					newCollection = collection.loadCollection(file);
-					if(newCollection == null) {
-						if(DataBase.isValidDatabase(file)){
-							newCollection = new DataBase(file);
-							iconLabel.setIcon(newCollection.getIcon());
-							infoLabel.setText("<html>"+info+"It's "+newCollection.getItemName()+" collection with "+newCollection.sizeOfDB()+" elements </html>");
+					newDB = dataBase.loadCollection(file);
+					if(newDB == null) {
+						if(dataBase.isValidDatabase(file)){
+							newDB = new DataBase(file);
+							iconLabel.setIcon(newDB.getIcon());
+							infoLabel.setText("<html>"+info+"It's "+newDB.getName()+" collection with "+newDB.size()+" elements </html>");
 							isBooksCollection = true;
 						} else if(GamesCollection.isValidDatabase(file)) {
-							newCollection = new GamesCollection(file);
-							iconLabel.setIcon(newCollection.getIcon());
-							infoLabel.setText("<html>"+info+"It's "+newCollection.getItemName()+" collection with "+newCollection.sizeOfDB()+" elements </html>");
+							newDB = new GamesCollection(file);
+							iconLabel.setIcon(newDB.getIcon());
+							infoLabel.setText("<html>"+info+"It's "+newDB.getName()+" collection with "+newDB.size()+" elements </html>");
 							isGamesCollection = true;
 						} else if(MoviesCollection.isValidDatabase(file)){
-							newCollection = new MoviesCollection(file);
-							iconLabel.setIcon(newCollection.getIcon());
-							infoLabel.setText("<html>"+info+"It's "+newCollection.getItemName()+" collection with "+newCollection.sizeOfDB()+" elements </html>");
+							newDB = new MoviesCollection(file);
+							iconLabel.setIcon(newDB.getIcon());
+							infoLabel.setText("<html>"+info+"It's "+newDB.getName()+" collection with "+newDB.size()+" elements </html>");
 							isMoviesCollection = true;
 						} else if(MusicCollection.isValidDatabase(file)) {
-							newCollection = new MusicCollection(file);
-							iconLabel.setIcon(newCollection.getIcon());
-							infoLabel.setText("<html>"+info+"It's "+newCollection.getItemName()+" collection with "+newCollection.sizeOfDB()+" elements </html>");
+							newDB = new MusicCollection(file);
+							iconLabel.setIcon(newDB.getIcon());
+							infoLabel.setText("<html>"+info+"It's "+newDB.getName()+" collection with "+newDB.size()+" elements </html>");
 							isMusicCollection = true;
 						} else {
 							infoLabel.setText("this collection is empty!");
@@ -79,8 +75,8 @@ public class ImportAccessory extends JPanel implements PropertyChangeListener {
 							getRootPane().getDefaultButton().setEnabled(false);
 						}
 					} else {
-						iconLabel.setIcon(collection.getIcon());
-						infoLabel.setText("<html> This " +collectionsName+ " collection contains "+collection.sizeOfDB()+" elements </html>");
+						iconLabel.setIcon(dataBase.getIcon());
+						infoLabel.setText("<html> This " +collectionsName+ " collection contains "+dataBase.size()+" elements </html>");
 						anyCollection = true;
 					}
 				} catch (IOException e) {
@@ -93,7 +89,7 @@ public class ImportAccessory extends JPanel implements PropertyChangeListener {
 	}
 	
 	public String getCollectionsName() {
-		if(isBooksCollection || isMusicCollection || isMoviesCollection || isGamesCollection || anyCollection) return newCollection.getItemName();
+		if(isBooksCollection || isMusicCollection || isMoviesCollection || isGamesCollection || anyCollection) return newDB.getName();
 		else return "";
 	}
 

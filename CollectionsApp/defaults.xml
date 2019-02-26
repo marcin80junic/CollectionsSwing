@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>defaults</comment>
+<entry key="table.foreground">#000000</entry>
+<entry key="main.font.italic">false</entry>
+<entry key="welcome.background">#d6d9df</entry>
+<entry key="table.font.family">false</entry>
+<entry key="welcome.font.bold">true</entry>
+<entry key="highlight.foreground">#ffffff</entry>
+<entry key="movies.column.sizes">200,200,150,200,45</entry>
+<entry key="table.font.bold">false</entry>
+<entry key="games.column.sizes">200,200,150,200,45</entry>
+<entry key="table.font.italic">false</entry>
+<entry key="main.font.family">false</entry>
+<entry key="welcome.font.italic">false</entry>
+<entry key="music.column.sizes">200,220,45,200,45</entry>
+<entry key="highlight.font.bold">true</entry>
+<entry key="main.font.bold">false</entry>
+<entry key="highlight.background">#000000</entry>
+<entry key="welcome.foreground">#000000</entry>
+<entry key="books.column.sizes">200,220,200,100,45</entry>
+<entry key="main.foreground">#000000</entry>
+<entry key="welcome.font.family">false</entry>
+<entry key="highlight.font.italic">true</entry>
+<entry key="highlight.font.family">false</entry>
+<entry key="main.background">#d6d9df</entry>
+<entry key="table.background">#ffffff</entry>
+</properties>

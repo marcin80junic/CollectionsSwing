@@ -1,8 +1,10 @@
 package collectableItems;
 
+import java.io.Serializable;
 
-public abstract class AbstractItem implements Collectable {
+public abstract class AbstractItem implements Collectable<AbstractItem>, Serializable {
 
+	private static final long serialVersionUID = 1L;
 	protected String author;
 	protected String title;
 	protected String genre;
@@ -46,6 +48,9 @@ public abstract class AbstractItem implements Collectable {
 	@Override
 	public void setSeries(String series) { 	}
 
+	@Override
+	public void setGenre(String genre) { this.genre = genre; }
+	
 	@Override
 	public void setDiscs(int[] discs) {  }
 

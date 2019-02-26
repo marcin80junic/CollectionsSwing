@@ -6,6 +6,7 @@ import java.util.Collections;
 
 public class Movie extends AbstractItem implements Comparable<Movie> {
 
+	private static final long serialVersionUID = 1L;
 	private String series;
 	
 	
@@ -27,6 +28,22 @@ public class Movie extends AbstractItem implements Comparable<Movie> {
 	public void setSeries(String series) { this.series = series; }
 
 	@Override
+	public Game createItem(String[] data) {
+		int year = Integer.parseInt(data[4]);
+		return new Game(data[0], data[1], data[2], data[3], year);
+	}
+	
+	@Override
+	public void editItem(String[] newData) {
+		if(!title.equals(newData[2])) setTitle(newData[0]);
+		if(!series.equals(newData[1])) setSeries(newData[1]);
+		if(!genre.equals(newData[3])) setGenre(newData[2]);
+		if(!author.equals(newData[0])) setAuthor(newData[3]);
+		int year = Integer.parseInt(newData[4]);
+		if(this.year != year) setYear(year);
+	}
+	
+	@Override
 	public String[] getGenres() {
 		ArrayList<String> genresArray = new ArrayList<>(Arrays.asList("Romance", "Western", "Comedy", "Drama", "Animation", "Pornographic", "Horror", "Action",
 				"Adventure", "Documentary", "Thriller", "Crime", "Fiction", "War", "Epic", "Romantic comedy",
@@ -42,6 +59,11 @@ public class Movie extends AbstractItem implements Comparable<Movie> {
 
 	@Override
 	public String[] getTableHeaders() { return new String[] {"#", "Title", "Series", "Genre", "Studio", "Year"}; }
+	
+	@Override
+	public String[] getComboHeaders() {
+		return new String[] {"--select Title--", "--select Series--", "--select Genre--", "--select Studio--", "-Year-"}; 
+	}
 	
 	@Override
 	public int compareTo(Movie movie) {

@@ -43,6 +43,7 @@ public class Appearance extends JPanel implements ChangeListener, ActionListener
 
 	private static final long serialVersionUID = 1L;
 	private CollectionsApp parent;
+	private AppProperties properties;
 	private JPanel previewPanel;
 	private JList<String> list;
 	private JColorChooser colorChooser;
@@ -51,18 +52,14 @@ public class Appearance extends JPanel implements ChangeListener, ActionListener
 	private JCheckBox bold, italic;
 	private JTextField fontSize;
 	private JComboBox<String> fontChooser;
-	private StyleContext sc;
-	private Style style;
-	private String[] styleNames;
 	private Color newColor;
 	private Font newFont;
 	
 	
-	public Appearance(CollectionsApp frame, StyleContext sc, String[] styleNames) {
+	public Appearance(CollectionsApp app, AppProperties props) {
 
-		parent = frame;
-		this.sc = sc;
-		this.styleNames = styleNames;
+		parent = app;
+		properties = props;
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		add(colorChooserInit());
 		add(fontPanelInit());

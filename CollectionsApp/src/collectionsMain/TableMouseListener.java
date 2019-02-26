@@ -6,6 +6,7 @@ import java.awt.event.MouseEvent;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 
+import collectableItems.AbstractItem;
 import collectableItems.Collectable;
 
 
@@ -15,16 +16,16 @@ public class TableMouseListener extends MouseAdapter {
 	private CollectionsApp frame;
 	private JTable table;
 	private JPopupMenu popupMenu;
-	private Collectable<?> collection;
+	private DataBase<? extends Collectable<? extends AbstractItem>> dataBase;
 	private Point point;
 	
 	
-	public TableMouseListener (CollectionsApp frame, JTable table, Collectable<?> collection){
+	public TableMouseListener (CollectionsApp frame, JTable table, DataBase<? extends Collectable<? extends AbstractItem>> dB){
 		
 		this.frame = (CollectionsApp) frame;
 		this.table = table;
 		popupMenu = table.getComponentPopupMenu();
-		this.collection = collection;
+		dataBase = dB;
 		point = new Point();
 	}
 	
@@ -45,7 +46,7 @@ public class TableMouseListener extends MouseAdapter {
 			int currentRow = table.rowAtPoint(point);
 			if(currentRow == -1) return;
 			int row = table.getSelectedRow();
-			new AddNewOrEditDialog(frame, table, collection, row);
+			new AddNewOrEditDialog(frame, table, dataBase, row);
 		}
 	}
 	

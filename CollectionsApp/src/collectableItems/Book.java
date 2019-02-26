@@ -6,10 +6,10 @@ import java.util.Collections;
 
 public class Book extends AbstractItem implements Comparable<Book> {
 
+	private static final long serialVersionUID = 1L;
 	private String series;
-
 	
-	public Book(String author, String series, String title, String genre, int year) {
+	public Book(String author, String title, String series, String genre, int year) {
 		super(author, title, genre, year);
 		this.series = series;
 	}
@@ -25,6 +25,22 @@ public class Book extends AbstractItem implements Comparable<Book> {
 	
 	@Override
 	public void setSeries(String series) { this.series = series; }
+	
+	@Override
+	public Book createItem(String[] data) {
+		int year = Integer.parseInt(data[4]);
+		return new Book(data[0], data[1], data[2], data[3], year);
+	}
+	
+	@Override
+	public void editItem(String[] newData) {
+		if(!author.equals(newData[0])) setAuthor(newData[0]);
+		if(!title.equals(newData[1])) setSeries(newData[1]);
+		if(!series.equals(newData[2])) setTitle(newData[2]);
+		if(!genre.equals(newData[3])) setGenre(newData[3]);
+		int year = Integer.parseInt(newData[4]);
+		if(this.year != year) setYear(year);
+	}
 	
 	@Override
 	public String[] getGenres() {
@@ -48,6 +64,11 @@ public class Book extends AbstractItem implements Comparable<Book> {
 	public String[] getTableHeaders() {	return new String[] {"#", "Author", "Title", "Series", "Genre", "Year"}; }
 	
 	@Override
+	public String[] getComboHeaders() {
+		return new String[] {"--select Author--", "--select Title--", "--select Series--", "--select Genre--", "-Year-"}; 
+	}
+	
+	@Override
 	public int compareTo(Book book) {
 		if (author.equals(book.author)) {
 			if (series.equals(book.series)) {
@@ -58,5 +79,6 @@ public class Book extends AbstractItem implements Comparable<Book> {
 			} else return series.compareTo(book.series);
 		} else return author.compareTo(book.author);
 	}
+
 
 }
