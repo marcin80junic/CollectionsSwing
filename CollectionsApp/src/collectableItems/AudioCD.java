@@ -16,10 +16,12 @@ public class AudioCD extends AbstractItem implements Comparable<AudioCD> {
 	}
 	
 	@Override
-	public String getName() { return "Audio CD"; }
+	public String getName() { return "AudioCD"; }
 	
 	@Override
-	public String toString() { return "Artist: "+author+"\nAlbum: "+title+"\nGenre: "+genre+"\nYear: "+year; }
+	public String toString() { 
+		return "Artist: "+author+"\nAlbum: "+title+"\nNumber of Discs: "+albumCds.length+"\nGenre: "+genre+"\nYear: "+year;
+	}
 	
 	@Override
 	public int[] getDiscs() { return albumCds; }
@@ -66,11 +68,11 @@ public class AudioCD extends AbstractItem implements Comparable<AudioCD> {
 	}
 
 	@Override
-	public String[] getTableHeaders() { return new String[] {"#", "Artist", "Album", "CDs", "Genre", "Year"}; }
+	public String[] getTableHeaders() { return new String[] {"#", "Artist", "Album", "Genre", "CDs", "Year"}; }
 	
 	@Override
 	public String[] getComboHeaders() {
-		return new String[] {"--select Artist--", "--select Album--", "-CDs-", "--select Genre--", "-Year-"}; 
+		return new String[] {"--select Artist--", "--select Album--", "--select Genre--",  "-CDs-", "-Year-"}; 
 	}
 	
 	@Override

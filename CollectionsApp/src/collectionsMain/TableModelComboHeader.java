@@ -34,7 +34,6 @@ class TableModelComboHeader extends AbstractTableModel implements TableModel, Ac
 	
 	
 	public TableModelComboHeader(CollectionsApp app, JTable table) {
-		
 		application = app;
 		this.table = table;
 		comboInit();
@@ -104,14 +103,12 @@ class TableModelComboHeader extends AbstractTableModel implements TableModel, Ac
 	
 	
 	private void saveComboFlags() {
-		
 		boolean[] flags = {combo1Flag, combo2Flag, combo3Flag, combo4Flag, combo5Flag};
 		dataBase.setComboFlags(flags);
 	}
 	
 	
 	private void updateComboFlags() {
-		
 		boolean[] flags = dataBase.getComboFlags();
 		for(int i=0; i<flags.length; i++) {
 			switch(i) {
@@ -134,18 +131,13 @@ class TableModelComboHeader extends AbstractTableModel implements TableModel, Ac
 		}
 	}
 
-
-	void resetComboFlags() {
-		
+	void resetComboFlags() {	
 		combo1Flag = combo2Flag = combo3Flag = combo4Flag = combo5Flag = false;
 	}
 	
-	
 	boolean isComboSelected() {
-		
 		return (combo1Flag || combo2Flag || combo3Flag || combo4Flag || combo5Flag)? true: false;
 	}
-	
 	
 	void resetModel() {
 		resetComboFlags();
@@ -153,20 +145,16 @@ class TableModelComboHeader extends AbstractTableModel implements TableModel, Ac
 		updateComboLists();
 	}
 	
-
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	void updateComboLists() {
-		
 		dataBase = application.getDataBase();
-		tableModel = (TableModelCollection) table.getModel();
-		
+		tableModel = (TableModelCollection<? extends Collectable<? extends AbstractItem>>) table.getModel();
 		String[] comboHeaders = dataBase.getComboHeaders();
 		String[] combo1List = new String[tableModel.getRowCount()+1];
 		String[] combo2List = new String[tableModel.getRowCount()+1];
 		String[] combo3List = new String[tableModel.getRowCount()+1];
 		String[] combo4List = new String[tableModel.getRowCount()+1];
 		String[] combo5List = new String[tableModel.getRowCount()+1];
-
 		if(tableModel.getRowCount() == 0) {
 			DefaultComboBoxModel [] comboModels = {combo1Model, combo2Model, combo3Model, combo4Model, combo5Model};
 			String[][] comboLists = {combo1List, combo2List, combo3List, combo4List, combo5List};
@@ -250,14 +238,12 @@ class TableModelComboHeader extends AbstractTableModel implements TableModel, Ac
 	
 	@SuppressWarnings("unchecked")
 	private void comboSelected(int comboNumber, String selection) {
-		
 		tableModel = (TableModelCollection<? extends Collectable<? extends AbstractItem>>) table.getModel();
 		dataBase = application.getDataBase();
-		
+		System.out.println(tableModel.getRowCount());
 		int size, size2 = 0;
 		int numOfVar = tableModel.getColumnCount()-1;
 		String element = "";
-		
 		size = tableModel.getRowCount()-1;
 		for(int i=size; i>=0; i--) {
 			if(!tableModel.getValueAt(i, comboNumber).equals(selection)){
@@ -364,7 +350,7 @@ class TableModelComboHeader extends AbstractTableModel implements TableModel, Ac
 		}
 		saveComboFlags();
 		updateComboLists();
-		application.initHeaderRenderers();
+		//application.initComboHeaderRenderers();
 	}
 	
 	public static String[] removeDuplicates(String[] array) {
@@ -467,7 +453,8 @@ class TableModelComboHeader extends AbstractTableModel implements TableModel, Ac
 		}
 	}
 	
-	public class Renderer implements TableCellRenderer{
+	public class Renderer implements TableCellRenderer {
+		
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 			switch(column) {
@@ -481,10 +468,13 @@ class TableModelComboHeader extends AbstractTableModel implements TableModel, Ac
 		}
 	}
 	
-	public class Editor extends DefaultCellEditor{
+	public class Editor extends DefaultCellEditor {
+		
 		private static final long serialVersionUID = 1L;
+		
 		public Editor() { this (combo1); }
-		public Editor(JComboBox<?> comboBox) { super(comboBox); }
+		public Editor(JComboBox<String> comboBox) { super(comboBox); }
+		
 		@Override
 		public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
 			switch(column) {

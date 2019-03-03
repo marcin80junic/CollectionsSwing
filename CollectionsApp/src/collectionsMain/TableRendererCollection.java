@@ -7,18 +7,14 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
 
-
 public class TableRendererCollection extends JTextField implements TableCellRenderer {
 
 	private static final long serialVersionUID = 1L;
-	private CollectionsApp app;
 	private String s;
 	
 	
-	public TableRendererCollection(CollectionsApp application) {
-		
+	public TableRendererCollection() {
 		super();
-		app = application;
 		setBorder(null);
 		setOpaque(true);
 	}
@@ -35,17 +31,17 @@ public class TableRendererCollection extends JTextField implements TableCellRend
 		else setHorizontalAlignment(CENTER);
 		
 		if(isSelected) {
-			setBackground(app.getHighlightBackground());
-			setForeground(app.getHighlightForeground());
-			setFont(app.getHighlightFont());
+			setBackground(CollectionsApp.getHighlightBackground());
+			setForeground(CollectionsApp.getHighlightForeground());
+			setFont(CollectionsApp.getHighlightFont());
 		}
 		else {
-			setBackground(app.getTableBackground());
-			setForeground(app.getTableForeground());
-			setFont(app.getTableFont());
+			setBackground(CollectionsApp.getTableBackground());
+			setForeground(CollectionsApp.getTableForeground());
+			setFont(CollectionsApp.getTableFont());
 		}
 		
-		String search = app.getSearchText();
+		String search = CollectionsApp.getSearchText();
 		if(!search.equals("")) {
 			setHighlight(search);
 		}
@@ -60,7 +56,7 @@ public class TableRendererCollection extends JTextField implements TableCellRend
 			int searchLength = search.length();
 			try {
 				getHighlighter().addHighlight(indexOf, indexOf+searchLength, 
-						new DefaultHighlighter.DefaultHighlightPainter(app.getHighlightBackground()));
+						new DefaultHighlighter.DefaultHighlightPainter(CollectionsApp.getHighlightBackground()));
 			} catch (BadLocationException e) { e.printStackTrace(); }
 			
 		} else {

@@ -9,20 +9,15 @@ import javax.swing.JTable;
 import collectableItems.AbstractItem;
 import collectableItems.Collectable;
 
-
 public class TableMouseListener extends MouseAdapter {
 	
-	
-	private CollectionsApp frame;
 	private JTable table;
 	private JPopupMenu popupMenu;
 	private DataBase<? extends Collectable<? extends AbstractItem>> dataBase;
 	private Point point;
 	
 	
-	public TableMouseListener (CollectionsApp frame, JTable table, DataBase<? extends Collectable<? extends AbstractItem>> dB){
-		
-		this.frame = (CollectionsApp) frame;
+	public TableMouseListener (JTable table, DataBase<? extends Collectable<? extends AbstractItem>> dB){
 		this.table = table;
 		popupMenu = table.getComponentPopupMenu();
 		dataBase = dB;
@@ -46,7 +41,7 @@ public class TableMouseListener extends MouseAdapter {
 			int currentRow = table.rowAtPoint(point);
 			if(currentRow == -1) return;
 			int row = table.getSelectedRow();
-			new AddNewOrEditDialog(frame, table, dataBase, row);
+			new AddNewOrEditDialog(table, dataBase, row);
 		}
 	}
 	
@@ -57,7 +52,8 @@ public class TableMouseListener extends MouseAdapter {
 	private void showPopupMenu(Point point) {
 		
 		int currentRow = table.rowAtPoint(point);
-		if(currentRow != -1) table.setRowSelectionInterval(currentRow, currentRow);
+		if(currentRow == -1) table.clearSelection();
+		else table.setRowSelectionInterval(currentRow, currentRow);
 		
 		int popupHeight = popupMenu.getHeight();
 		int popupWidth = popupMenu.getWidth();

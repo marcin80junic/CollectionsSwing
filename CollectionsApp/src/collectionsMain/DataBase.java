@@ -9,15 +9,21 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableColumnModel;
+import javax.swing.table.TableColumn;
+
 import collectableItems.AbstractItem;
 import collectableItems.Collectable;
 
 public class DataBase <T extends Collectable<? extends AbstractItem>> extends ArrayList<T> {
 	
 	private static final long serialVersionUID = 1L;
+	private T item;
 	private File dbFile;
 	private TableModelCollection<T> tableModel;
-	private T item;
+	private DefaultTableColumnModel comboTableColumnModel, tableColumnModel;
 	private boolean[] comboFlags = new boolean[5];
 
 	
@@ -29,7 +35,9 @@ public class DataBase <T extends Collectable<? extends AbstractItem>> extends Ar
 		this.dbFile = dB.dbFile;
 	}
 	
-	public DataBase(String filePath) { this(new File(filePath)); }
+	public DataBase(String filePath) { 
+		this(new File(filePath)); 
+	}
 	
 	public DataBase(File file) {
 		super();
@@ -77,29 +85,84 @@ public class DataBase <T extends Collectable<? extends AbstractItem>> extends Ar
 	@SuppressWarnings("unchecked")
 	public T create(String[] data) {
 		item = (T) item.createItem(data);
-		item.setID(size()+1);
-		return item;
-	}
-	
-	public boolean add(T item) {
-		boolean success = super.add(item);
-		saveToFile();
-		return success;
-	}
-	
-	public T remove(int index) {
-		T item = super.remove(index);
+		add(item);
 		saveToFile();
 		return item;
 	}
 	
-	public boolean remove(Object item) {
-		boolean success = super.remove(item);
+	public T remove(T item, int index) {
+		item = super.remove(index);
 		saveToFile();
-		return success;
+		return item;
 	}
 	
-	public TableModelCollection<T> getTableModel() { return tableModel; }
+	public DefaultTableColumnModel getTableColumnModel(JTable table) {
+		if(tableColumnModel == null) {
+			tableColumnModel = new DefaultTableColumnModel();
+			TableColumn column = null;
+			for(int i=0; i<table.getColumnModel().getColumnCount(); i++) {
+				column = table.getColumnModel().getColumn(i);
+				tableColumnModel.addColumn(column);
+			}
+			//tableColumnModel.setColumnMargin(0);
+		}
+		return tableColumnModel;
+	}
+	
+	public DefaultTableColumnModel getComboHeaderTableColumnModel(JTable table) {
+		if(comboTableColumnModel == null) {
+			comboTableColumnModel = new DefaultTableColumnModel();
+			TableColumn column = null;
+			for(int i=0; i<table.getColumnModel().getColumnCount(); i++) {
+				column = table.getColumnModel().getColumn(i);
+				column.setHeaderRenderer(new TableHeaderRenderer());
+				comboTableColumnModel.addColumn(column);
+			}
+			comboTableColumnModel.setColumnMargin(0);
+		}
+		return comboTableColumnModel;
+	}
+	
+	public void setColumnsWidths(int ...widths) {
+		if(comboTableColumnModel == null) return;
+		for(int i=0; i<comboTableColumnModel.getColumnCount(); i++) {
+			if(i==0) {
+				if(tableModel.getRowCount() < 10) {
+					tableColumnModel.getColumn(i).setMinWidth(15);
+					tableColumnModel.getColumn(i).setMaxWidth(15);
+					comboTableColumnModel.getColumn(i).setMinWidth(15);
+					comboTableColumnModel.getColumn(i).setMaxWidth(15);
+				} else if(tableModel.getRowCount() < 100) {
+					tableColumnModel.getColumn(i).setMinWidth(25);
+					tableColumnModel.getColumn(i).setMaxWidth(25);
+					comboTableColumnModel.getColumn(i).setMinWidth(25);
+					comboTableColumnModel.getColumn(i).setMaxWidth(25);
+				} else if(tableModel.getRowCount() < 1000) {
+					tableColumnModel.getColumn(i).setMinWidth(35);
+					tableColumnModel.getColumn(i).setMaxWidth(35);
+					comboTableColumnModel.getColumn(i).setMinWidth(35);
+					comboTableColumnModel.getColumn(i).setMaxWidth(35);
+				} else if(tableModel.getRowCount() < 10000) {
+					tableColumnModel.getColumn(i).setMinWidth(45);
+					tableColumnModel.getColumn(i).setMaxWidth(45);
+					comboTableColumnModel.getColumn(i).setMinWidth(45);
+					comboTableColumnModel.getColumn(i).setMaxWidth(45);
+				}
+			} else if(i == widths.length-1) {
+				tableColumnModel.getColumn(i).setMinWidth(widths[i-1]-20);
+				tableColumnModel.getColumn(i).setMaxWidth(widths[i-1]-20);
+				comboTableColumnModel.getColumn(i).setMinWidth(widths[i-1]);
+				comboTableColumnModel.getColumn(i).setMaxWidth(widths[i-1]);
+			} else {
+				tableColumnModel.getColumn(i).setMinWidth(widths[i-1]);
+				tableColumnModel.getColumn(i).setMaxWidth(widths[i-1]);
+				comboTableColumnModel.getColumn(i).setMinWidth(widths[i-1]);
+				comboTableColumnModel.getColumn(i).setMaxWidth(widths[i-1]);
+			}
+		}
+	}
+	
+	public TableModelCollection<T> getTableModel() { return tableModel.updateTableModel(); }
 	public String[] getComboHeaders() { return item.getComboHeaders(); }
 	public String getFilePath() { return dbFile.getPath(); }
 	public String getName() { 

@@ -22,21 +22,24 @@ public class TableModelCollection<T extends Collectable<? extends AbstractItem>>
 		filtered = sorted = false;
 	}
 	
-	public TableModelCollection<T> reloadTableModel(){
+	public TableModelCollection<T> reloadTableModel() {
 		dataBase = new DataBase<T>(origin);
 		filtered = false;
 		ascending = descending = 0;
+		fireTableDataChanged();
 		return this;
 	}
 	
+	public TableModelCollection<T> updateTableModel() { return this; }
+	
 	public void saveDataBase() {
-		origin = dataBase;
-		dataBase.saveToFile();
+		origin = new DataBase<T>(dataBase);
+		origin.saveToFile();
 		sorted = false;
 	}
 	
-	public int getAscending() { return ascending; }
-	public int getDescending() { return descending; }
+	public static int getAscending() { return ascending; }
+	public static int getDescending() { return descending; }
 	public boolean isChanged() { return sorted && !filtered; }
 	public boolean isFiltered() { return filtered; }
 	public void setFiltered(boolean filtered) { this.filtered = filtered; }
@@ -58,23 +61,18 @@ public class TableModelCollection<T extends Collectable<? extends AbstractItem>>
 	
 	public T getItem(int index) { return dataBase.get(index); }
 	
-	/**public void addItem(T item) {
-		dataBase.add(item);
-		origin.add(item);
-		ascending = descending = 0;
-		fireTableRowsInserted(dataBase.size()-1, dataBase.size()-1);
-	}*/
-	
 	public void createItem(String[] data) {
-		T item = dataBase.create(data);
+		T item = origin.create(data);
 		dataBase.add(item);
-		origin.add(item);
-		fireTableRowsInserted(getRowCount(), getRowCount());
+		ascending = descending = 0;
+		sorted = false;
+		fireTableRowsInserted(getRowCount()-1, getRowCount());
 	}
 	
 	public void editItem(int index, String[] newData) {
 		T item = dataBase.get(index);
 		item.editItem(newData);
+		origin.saveToFile();
 	}
 	
 	public void removeItem(int index) {
@@ -82,8 +80,9 @@ public class TableModelCollection<T extends Collectable<? extends AbstractItem>>
 		fireTableRowsDeleted(index, index);
 	}
 	
-	public void removeItem(Object item) {
-		int index = dataBase.indexOf(item);
+	@SuppressWarnings("unchecked")
+	public void removeItem(Object item, int index) {
+		origin.remove((T) item, index);
 		dataBase.remove(item);
 		fireTableRowsDeleted(index, index);
 	}
@@ -91,23 +90,35 @@ public class TableModelCollection<T extends Collectable<? extends AbstractItem>>
 	public void moveItemUp(int index) {
 		dataBase.add(index-1, dataBase.remove(index));
 		ascending = descending = 0;
+		sorted = false;
 	}
 	
 	public void moveItemDown(int index) {
 		dataBase.add(index+1, dataBase.remove(index));
 		ascending = descending = 0;
+		sorted = false;
 	}
 	
 	public void sort(int columnIndex, boolean toggle) {
-		Comparator<T> comp = (str1, str2) -> ((String) getValueAt(dataBase.indexOf(str1), columnIndex)).compareToIgnoreCase
-				(((String) getValueAt(dataBase.indexOf(str2), columnIndex)));
+		Comparator<T> comp = (str1, str2) -> {
+			String s1 = (String) getValueAt(dataBase.indexOf(str1), columnIndex);
+			String s2 = (String) getValueAt(dataBase.indexOf(str2), columnIndex);
+			try {
+				int one = Integer.parseInt(s1);
+				int two = Integer.parseInt(s2);
+				return one-two;
+			} catch (NumberFormatException e) {}
+			return s1.compareToIgnoreCase(s2); 
+		};
 		if(!toggle) {
 			Collections.sort(dataBase, comp);
 			ascending = columnIndex;
+			descending = 0;
 		}
 		else {
 			Collections.sort(dataBase, comp.reversed());
 			descending = columnIndex;
+			ascending = 0;
 		}
 		sorted = true;
 		fireTableDataChanged();
@@ -132,7 +143,7 @@ public class TableModelCollection<T extends Collectable<? extends AbstractItem>>
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		T item = dataBase.get(rowIndex);
 		String columnHeader = columns[columnIndex];
-		Object value = (columnIndex==0)? String.valueOf(item.getID()): returnValue(item, columnHeader);
+		Object value = (columnIndex==0)? String.valueOf(rowIndex+1): returnValue(item, columnHeader);
 		return value;
 	}
 	

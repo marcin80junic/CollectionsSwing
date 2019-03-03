@@ -6,31 +6,25 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 
-
 public class ComboBoxRenderer extends JLabel implements ListCellRenderer<Object> {
-
 	
 	private static final long serialVersionUID = 1L;
 	private CollectionsApp app;
 
 
 	public ComboBoxRenderer(CollectionsApp application){
-		
+		super();
 		app = application;
 		setOpaque(true);
         setVerticalAlignment(CENTER);
-        setHorizontalAlignment(CENTER);
-        
+        setHorizontalAlignment(CENTER);    
 	}
 	
 	@Override
 	public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
 			boolean cellHasFocus) {
-		
-		String s = (String) value;
-		setText(s);
+		setText(value.toString());
 		Font highlightFont = app.getHighlightFont();
-		
 		if (isSelected) {
 			if(index==0) setFont(highlightFont.deriveFont(Font.ITALIC));
 			else setFont(highlightFont);
@@ -42,9 +36,7 @@ public class ComboBoxRenderer extends JLabel implements ListCellRenderer<Object>
 			setBackground(app.getTableBackground());
 			setForeground(app.getTableForeground());
 		}
-		
 		return this;
 	}
-	
 
 }

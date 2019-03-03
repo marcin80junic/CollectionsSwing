@@ -8,6 +8,8 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.filechooser.FileView;
+
+import collectableItems.AbstractItem;
 import collectableItems.AudioCD;
 import collectableItems.Book;
 import collectableItems.Collectable;
@@ -17,7 +19,7 @@ import collectableItems.Movie;
 public class CollectionsThumbNailView extends FileView {
 
 	
-	private DataBase<? extends Collectable> dataBase;
+	private DataBase<? extends Collectable<? extends AbstractItem>> dataBase;
 	private Component observer;
 	
 	

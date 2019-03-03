@@ -10,6 +10,8 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+
+import collectableItems.AbstractItem;
 import collectableItems.Collectable;
 
 public class ImportAccessory extends JPanel implements PropertyChangeListener {
@@ -18,10 +20,10 @@ public class ImportAccessory extends JPanel implements PropertyChangeListener {
 	
 	private String collectionsName, info;
 	private JLabel fileLabel, iconLabel, infoLabel;
-	private DataBase<? extends Collectable> dataBase, newDB;
+	private DataBase<? extends Collectable<? extends AbstractItem>> dataBase, newDB;
 	boolean isHome, isBooksCollection, isMusicCollection, isMoviesCollection, isGamesCollection, anyCollection;
 	
-	public ImportAccessory (DataBase<? extends Collectable> dB, boolean homeFlag) {
+	public ImportAccessory (DataBase<? extends Collectable<? extends AbstractItem>> dB, boolean homeFlag) {
 		setPreferredSize(new Dimension(150, 150));
 		dataBase = dB;
 		collectionsName = dataBase.getName();

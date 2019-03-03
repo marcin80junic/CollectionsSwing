@@ -45,13 +45,19 @@ public class AppProperties extends Properties {
 	public static final int MUSIC_COLUMN_SIZES = 23;
 	protected static final int COLUMN_SIZES_COUNT = 4;
 	
-	protected static final int PROPERTIES_COUNT = 24;
+	public static final int BOOKS_FILE_PATH = 24;
+	public static final int GAMES_FILE_PATH = 25;
+	public static final int MOVIES_FILE_PATH = 26;
+	public static final int MUSIC_FILE_PATH = 27;
+	protected static final int FILE_PATHS_COUNT = 4;
+	
+	protected static final int PROPERTIES_COUNT = 28;
 	
 	protected final String[] KEYS = {"main.background", "main.foreground", "welcome.background", "welcome.foreground", "table.background",
 			"table.foreground", "highlight.background", "highlight.foreground", "main.font.family", "main.font.bold", "main.font.italic", 
 			"welcome.font.family", "welcome.font.bold", "welcome.font.italic", "table.font.family", "table.font.bold", "table.font.italic",
 			"highlight.font.family", "highlight.font.bold", "highlight.font.italic", "books.column.sizes", "games.column.sizes",
-			"movies.column.sizes", "music.column.sizes"};
+			"movies.column.sizes", "music.column.sizes", "books.file.path", "games.file.path", "movies.file.path", "music.file.path"};
 	
 	private final File XML_FILE = new File("properties.xml");
 	private final File DEF_XML_FILE = new File("defaults.xml");
@@ -94,11 +100,20 @@ public class AppProperties extends Properties {
 			String[] defColumns = new String[COLUMN_SIZES_COUNT];
 			for(int i=0; i<defColumns.length; i++) {
 				int j = COLORS_COUNT+FONTS_PROP_COUNT+i;
-				if(j == BOOKS_COLUMN_SIZES) defColumns[i] = "200,220,200,100,45";
-				if(j == GAMES_COLUMN_SIZES) defColumns[i] = "200,200,150,200,45";
-				if(j == MOVIES_COLUMN_SIZES) defColumns[i] = "200,200,150,200,45";
-				if(j == MUSIC_COLUMN_SIZES) defColumns[i] = "200,220,45,200,45";
+				if(j == BOOKS_COLUMN_SIZES) defColumns[i] = "200,200,190,120,80";
+				if(j == GAMES_COLUMN_SIZES) defColumns[i] = "225,200,150,200,45";
+				if(j == MOVIES_COLUMN_SIZES) defColumns[i] = "225,200,150,200,45";
+				if(j == MUSIC_COLUMN_SIZES) defColumns[i] = "225,220,200,45,45";
 				defaults.put(KEYS[j], defColumns[i]);
+			}
+			String[] defPaths = new String[FILE_PATHS_COUNT];
+			for(int i=0; i<defPaths.length; i++) {
+				int j = COLORS_COUNT+FONTS_PROP_COUNT+COLUMN_SIZES_COUNT+i;
+				if(j == BOOKS_FILE_PATH) defPaths[i] = "/books.dat";
+				if(j == GAMES_FILE_PATH) defPaths[i] = "/games.dat";
+				if(j == MOVIES_FILE_PATH) defPaths[i] = "/movies.dat";
+				if(j == MUSIC_FILE_PATH) defPaths[i] = "/music.dat";
+				defaults.put(KEYS[j], defPaths[i]);
 			}
 			try(FileOutputStream out = new FileOutputStream(DEF_XML_FILE)){
 				defaults.storeToXML(out, "defaults");
@@ -133,6 +148,25 @@ public class AppProperties extends Properties {
 		return new Font(fontName, (isBold? Font.BOLD: 0 ) | (isItalic? Font.ITALIC: 0), 12);
 	}
 	
+	public String getFilePath(int which) {
+		if(which >= COLORS_COUNT+FONTS_PROP_COUNT+COLUMN_SIZES_COUNT+FILE_PATHS_COUNT ||
+				which < COLORS_COUNT+FONTS_PROP_COUNT+COLUMN_SIZES_COUNT) {
+			throw new IllegalArgumentException("property is invalid");
+		}
+		return getProperty(KEYS[which]);
+	}
+	
+	public int[] getColumnWidths(int whichColumnWidths) {
+		if(whichColumnWidths != BOOKS_COLUMN_SIZES && whichColumnWidths != GAMES_COLUMN_SIZES && whichColumnWidths != MOVIES_COLUMN_SIZES &&
+				whichColumnWidths != MUSIC_COLUMN_SIZES) throw new IllegalArgumentException("property is invalid");
+		String[] columns = getProperty(KEYS[whichColumnWidths]).split(",");
+		int[] widths = new int[columns.length];
+		for(int i=0; i<columns.length; i++) {
+			widths[i] = Integer.parseInt(columns[i]);
+		}
+		return widths;
+	}
+	
 	public void setColumnSizes(int columnSizes, JTable table) {
 		if(columnSizes != BOOKS_COLUMN_SIZES && columnSizes != GAMES_COLUMN_SIZES && columnSizes != MOVIES_COLUMN_SIZES &&
 				columnSizes != MUSIC_COLUMN_SIZES) throw new IllegalArgumentException("property is invalid");
@@ -150,7 +184,9 @@ public class AppProperties extends Properties {
 				column.setMinWidth(Integer.valueOf(columns[i-1]));
 				column.setMaxWidth(Integer.valueOf(columns[i-1]));
 			} else {
+				column.setMinWidth(50);
 				column.setPreferredWidth(Integer.valueOf(columns[i-1]));
+				column.setMaxWidth(300);
 			}
 		}
 	}

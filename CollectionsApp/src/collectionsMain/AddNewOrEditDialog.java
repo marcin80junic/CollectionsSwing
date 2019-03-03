@@ -41,7 +41,7 @@ public class AddNewOrEditDialog extends JDialog {
 	private boolean isAudio;
 	
 	
-	AddNewOrEditDialog (CollectionsApp frame, JTable table, DataBase<? extends Collectable<? extends AbstractItem>> dataBase) {
+	AddNewOrEditDialog (JTable table, DataBase<? extends Collectable<? extends AbstractItem>> dataBase) {
 		
 		setTitle("Add New "+dataBase.getName());
 		numOfVar = table.getColumnCount()-1;
@@ -146,7 +146,8 @@ public class AddNewOrEditDialog extends JDialog {
 		}
 		
 		if(numOfVar >= 4) {
-			varName4 = dataBase.getTableModel().getColumnName(4);
+			if(isAudio) varName4 = "Year";
+			else varName4 = dataBase.getTableModel().getColumnName(4);
 			JLabel lbl4 = new JLabel(varName4);
 			GridBagConstraints lg = new GridBagConstraints();
 			lg.gridx = 0;
@@ -214,8 +215,6 @@ public class AddNewOrEditDialog extends JDialog {
 		btnSave.addActionListener((ae) -> {
 			try {
 				((TableModelCollection<?>) table.getModel()).createItem(getData());
-				frame.saveAction.setEnabled(true);
-				frame.saveAllAction.setEnabled(true);
 				setVisible(false);
 				Rectangle rowRectangle = table.getCellRect(table.getRowCount(), 0, true);
 				table.scrollRectToVisible(rowRectangle);
@@ -237,12 +236,12 @@ public class AddNewOrEditDialog extends JDialog {
 		setResizable(false);
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		getRootPane().setDefaultButton(btnSave);
-		setLocationRelativeTo(frame);
+		setLocationRelativeTo(null);
 		setVisible(true);
 
 	}
 	
-	AddNewOrEditDialog (CollectionsApp frame, JTable table, DataBase<?> dataBase, int index) {
+	AddNewOrEditDialog (JTable table, DataBase<?> dataBase, int index) {
 		
 		setTitle("Edit "+dataBase.getName());
 		setLayout(new GridBagLayout());
@@ -359,7 +358,8 @@ public class AddNewOrEditDialog extends JDialog {
 		}
 		
 		if(numOfVar >= 4) {
-			varName4 = dataBase.getTableModel().getColumnName(4);
+			if(isAudio) varName4 = "Year";
+			else varName4 = dataBase.getTableModel().getColumnName(4);
 			JLabel lbl4 = new JLabel(varName4);
 			GridBagConstraints l4 = new GridBagConstraints();
 			l4.gridx = 0;
@@ -379,7 +379,7 @@ public class AddNewOrEditDialog extends JDialog {
 				add(genre, t4);
 			}
 			else if(varName4.equals("Year")) {
-				year.setValue(Integer.parseInt((String) dataBase.getTableModel().getValueAt(index, 4)));
+				year.setValue(Integer.parseInt((String) dataBase.getTableModel().getValueAt(index, isAudio? 5: 4)));
 				add(year, t4);
 			}
 			else {
@@ -440,8 +440,6 @@ public class AddNewOrEditDialog extends JDialog {
 			try {
 				int row = table.convertRowIndexToModel(table.getSelectedRow());
 				((TableModelCollection<?>) table.getModel()).editItem(row, getData());
-				frame.saveAction.setEnabled(true);
-				frame.saveAllAction.setEnabled(true);
 				setVisible(false);
 			} catch (NumberFormatException nfe) { displayWarning(); }
 		});
@@ -462,7 +460,7 @@ public class AddNewOrEditDialog extends JDialog {
 		setResizable(false);
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		getRootPane().setDefaultButton(btnSave);
-		setLocationRelativeTo(frame);
+		setLocationRelativeTo(null);
 		setVisible(true);
 	}
 	
@@ -533,7 +531,7 @@ public class AddNewOrEditDialog extends JDialog {
 		int not = 0;
 		if(isAudio) {
 			not = (int)numOfCds.getValue();
-			data = new String[numOfVar+not-1];
+			data = new String[numOfVar+not-2];
 		}
 		else { data = new String[numOfVar]; }
 		
