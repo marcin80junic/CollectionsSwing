@@ -9,12 +9,10 @@ import javax.swing.ListCellRenderer;
 public class ComboBoxRenderer extends JLabel implements ListCellRenderer<Object> {
 	
 	private static final long serialVersionUID = 1L;
-	private CollectionsApp app;
+	
 
-
-	public ComboBoxRenderer(CollectionsApp application){
+	public ComboBoxRenderer(){
 		super();
-		app = application;
 		setOpaque(true);
         setVerticalAlignment(CENTER);
         setHorizontalAlignment(CENTER);    
@@ -24,17 +22,17 @@ public class ComboBoxRenderer extends JLabel implements ListCellRenderer<Object>
 	public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
 			boolean cellHasFocus) {
 		setText(value.toString());
-		Font highlightFont = app.getHighlightFont();
+		Font highlightFont = CollectionsApp.getHighlightFont();
 		if (isSelected) {
 			if(index==0) setFont(highlightFont.deriveFont(Font.ITALIC));
 			else setFont(highlightFont);
-			setBackground(app.getHighlightBackground());
-			setForeground(app.getHighlightForeground());
+			setBackground(CollectionsApp.getHighlightBackground());
+			setForeground(CollectionsApp.getHighlightForeground());
 		} else {
-			if(index==0) setFont(app.getTableFont().deriveFont(Font.PLAIN | Font.ITALIC));
-			else setFont(app.getTableFont());
-			setBackground(app.getTableBackground());
-			setForeground(app.getTableForeground());
+			if(index==0) setFont(CollectionsApp.getTableFont().deriveFont(Font.PLAIN | Font.ITALIC));
+			else setFont(CollectionsApp.getTableFont());
+			setBackground(CollectionsApp.getTableBackground());
+			setForeground(CollectionsApp.getTableForeground());
 		}
 		return this;
 	}

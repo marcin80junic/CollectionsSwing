@@ -58,6 +58,9 @@ public class Game extends AbstractItem implements Comparable<Game> {
 	public String[] getComboHeaders() {
 		return new String[] {"--select Title--", "--select Series--", "--select Genre--", "--select Studio--", "-Year-"}; 
 	}
+
+	@Override
+	public String getIconPath() { return "/icons/Games.png"; }
 	
 	@Override
 	public int compareTo(Game game) {

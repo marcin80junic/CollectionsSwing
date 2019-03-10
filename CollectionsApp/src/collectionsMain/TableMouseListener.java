@@ -11,13 +11,15 @@ import collectableItems.Collectable;
 
 public class TableMouseListener extends MouseAdapter {
 	
+	private CollectionsApp application;
 	private JTable table;
 	private JPopupMenu popupMenu;
 	private DataBase<? extends Collectable<? extends AbstractItem>> dataBase;
 	private Point point;
 	
 	
-	public TableMouseListener (JTable table, DataBase<? extends Collectable<? extends AbstractItem>> dB){
+	public TableMouseListener (CollectionsApp app, JTable table, DataBase<? extends Collectable<? extends AbstractItem>> dB){
+		application = app;
 		this.table = table;
 		popupMenu = table.getComponentPopupMenu();
 		dataBase = dB;
@@ -41,7 +43,7 @@ public class TableMouseListener extends MouseAdapter {
 			int currentRow = table.rowAtPoint(point);
 			if(currentRow == -1) return;
 			int row = table.getSelectedRow();
-			new AddNewOrEditDialog(table, dataBase, row);
+			new AddNewOrEditDialog(application, table, dataBase, row);
 		}
 	}
 	

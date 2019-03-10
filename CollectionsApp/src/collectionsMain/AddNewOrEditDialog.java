@@ -41,7 +41,7 @@ public class AddNewOrEditDialog extends JDialog {
 	private boolean isAudio;
 	
 	
-	AddNewOrEditDialog (JTable table, DataBase<? extends Collectable<? extends AbstractItem>> dataBase) {
+	AddNewOrEditDialog (CollectionsApp app, JTable table, DataBase<? extends Collectable<? extends AbstractItem>> dataBase) {
 		
 		setTitle("Add New "+dataBase.getName());
 		numOfVar = table.getColumnCount()-1;
@@ -215,6 +215,8 @@ public class AddNewOrEditDialog extends JDialog {
 		btnSave.addActionListener((ae) -> {
 			try {
 				((TableModelCollection<?>) table.getModel()).createItem(getData());
+				if(String.valueOf(table.getRowCount()-1).length() != String.valueOf(table.getRowCount()).length()) app.columnsUpdate();
+				app.tableUpdate();
 				setVisible(false);
 				Rectangle rowRectangle = table.getCellRect(table.getRowCount(), 0, true);
 				table.scrollRectToVisible(rowRectangle);
@@ -241,7 +243,7 @@ public class AddNewOrEditDialog extends JDialog {
 
 	}
 	
-	AddNewOrEditDialog (JTable table, DataBase<?> dataBase, int index) {
+	AddNewOrEditDialog (CollectionsApp app, JTable table, DataBase<?> dataBase, int index) {
 		
 		setTitle("Edit "+dataBase.getName());
 		setLayout(new GridBagLayout());
@@ -440,6 +442,7 @@ public class AddNewOrEditDialog extends JDialog {
 			try {
 				int row = table.convertRowIndexToModel(table.getSelectedRow());
 				((TableModelCollection<?>) table.getModel()).editItem(row, getData());
+				app.tableUpdate();
 				setVisible(false);
 			} catch (NumberFormatException nfe) { displayWarning(); }
 		});

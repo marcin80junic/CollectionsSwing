@@ -109,10 +109,10 @@ public class AppProperties extends Properties {
 			String[] defPaths = new String[FILE_PATHS_COUNT];
 			for(int i=0; i<defPaths.length; i++) {
 				int j = COLORS_COUNT+FONTS_PROP_COUNT+COLUMN_SIZES_COUNT+i;
-				if(j == BOOKS_FILE_PATH) defPaths[i] = "/books.dat";
-				if(j == GAMES_FILE_PATH) defPaths[i] = "/games.dat";
-				if(j == MOVIES_FILE_PATH) defPaths[i] = "/movies.dat";
-				if(j == MUSIC_FILE_PATH) defPaths[i] = "/music.dat";
+				if(j == BOOKS_FILE_PATH) defPaths[i] = "books.dat";
+				if(j == GAMES_FILE_PATH) defPaths[i] = "games.dat";
+				if(j == MOVIES_FILE_PATH) defPaths[i] = "movies.dat";
+				if(j == MUSIC_FILE_PATH) defPaths[i] = "music.dat";
 				defaults.put(KEYS[j], defPaths[i]);
 			}
 			try(FileOutputStream out = new FileOutputStream(DEF_XML_FILE)){

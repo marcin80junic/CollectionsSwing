@@ -17,11 +17,13 @@ public class TableHeaderRenderer extends JPanel implements TableCellRenderer {
 	private static final long serialVersionUID = 1L;
 	private JLabel title, icon;
 	private SorterIcon ascIcon, descIcon;
+	private TableModelCollection<?> tableModel;
 	private boolean isAsc;
 
 
-	public TableHeaderRenderer() {
+	public TableHeaderRenderer(TableModelCollection<?> tableModel) {
 		super();
+		this.tableModel = tableModel;
 		isAsc = false;
 		title = new JLabel();
 		icon = new JLabel();
@@ -40,18 +42,17 @@ public class TableHeaderRenderer extends JPanel implements TableCellRenderer {
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 			int row, int column) {
 		
-		title.setText(value.toString());
+		title.setText(tableModel.getColumnName(column));
 		title.setFont(CollectionsApp.getMainFont());
 		title.setForeground(CollectionsApp.getMainForeground());
 		if(column == 0) {
 			remove(icon);
-			return this;
 		}
-		else if(column == TableModelCollection.getAscending()) {
+		else if(tableModel.getAscending()[column]) {
 			icon.setIcon(ascIcon);
 			isAsc = true;
 		}
-		else if(column == TableModelCollection.getDescending()) {
+		else if(tableModel.getDescending()[column]) {
 			icon.setIcon(descIcon);
 			isAsc = false;
 		}

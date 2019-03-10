@@ -1,5 +1,9 @@
 package collectableItems;
 
+import java.net.URL;
+
+import javax.swing.ImageIcon;
+
 public interface Collectable<T> {
 	
 	String getName();
@@ -24,5 +28,16 @@ public interface Collectable<T> {
 	String[] getGenres();
 	String[] getTableHeaders();
 	String[] getComboHeaders();
+	String getIconPath();
 	String toString();
+	
+	public default ImageIcon createImageIcon(String path, String description) {
+		URL imgURL = getClass().getResource(path);
+		if (imgURL != null) {
+			return new ImageIcon(imgURL, description);
+		} else {
+			System.err.println("Couldn't find file: " + path);
+			return null;
+		}
+	}
 }

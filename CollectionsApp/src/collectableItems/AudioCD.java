@@ -38,8 +38,8 @@ public class AudioCD extends AbstractItem implements Comparable<AudioCD> {
 	@Override
 	public void editItem(String[] newData) {
 		if(!author.equals(newData[0])) setAuthor(newData[0]);
-		if(!title.equals(newData[1])) setTitle(newData[2]);
-		if(!genre.equals(newData[2])) setGenre(newData[3]);
+		if(!title.equals(newData[1])) setTitle(newData[1]);
+		if(!genre.equals(newData[2])) setGenre(newData[2]);
 		int year = Integer.parseInt(newData[3]);
 		if(this.year != year) setYear(year);
 		int[] cds = parseCDs(newData);
@@ -74,6 +74,9 @@ public class AudioCD extends AbstractItem implements Comparable<AudioCD> {
 	public String[] getComboHeaders() {
 		return new String[] {"--select Artist--", "--select Album--", "--select Genre--",  "-CDs-", "-Year-"}; 
 	}
+	
+	@Override
+	public String getIconPath() { return "/icons/Music.png"; }
 	
 	@Override
 	public int compareTo(AudioCD cd) {

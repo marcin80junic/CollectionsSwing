@@ -35,8 +35,8 @@ public class Book extends AbstractItem implements Comparable<Book> {
 	@Override
 	public void editItem(String[] newData) {
 		if(!author.equals(newData[0])) setAuthor(newData[0]);
-		if(!title.equals(newData[1])) setSeries(newData[1]);
-		if(!series.equals(newData[2])) setTitle(newData[2]);
+		if(!title.equals(newData[1])) setTitle(newData[1]);
+		if(!series.equals(newData[2])) setSeries(newData[2]);
 		if(!genre.equals(newData[3])) setGenre(newData[3]);
 		int year = Integer.parseInt(newData[4]);
 		if(this.year != year) setYear(year);
@@ -67,6 +67,9 @@ public class Book extends AbstractItem implements Comparable<Book> {
 	public String[] getComboHeaders() {
 		return new String[] {"--select Author--", "--select Title--", "--select Series--", "--select Genre--", "-Year-"}; 
 	}
+
+	@Override
+	public String getIconPath() { return "/icons/books.png"; }
 	
 	@Override
 	public int compareTo(Book book) {

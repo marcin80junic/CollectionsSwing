@@ -64,6 +64,9 @@ public class Movie extends AbstractItem implements Comparable<Movie> {
 	public String[] getComboHeaders() {
 		return new String[] {"--select Title--", "--select Series--", "--select Genre--", "--select Studio--", "-Year-"}; 
 	}
+
+	@Override
+	public String getIconPath() { return "/icons/Movies.png"; }
 	
 	@Override
 	public int compareTo(Movie movie) {

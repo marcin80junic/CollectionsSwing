@@ -9,7 +9,7 @@
 <entry key="welcome.font.bold">true</entry>
 <entry key="highlight.foreground">#ffffff</entry>
 <entry key="movies.column.sizes">225,200,150,200,45</entry>
-<entry key="games.file.path">/games.dat</entry>
+<entry key="games.file.path">games.dat</entry>
 <entry key="table.font.bold">false</entry>
 <entry key="games.column.sizes">225,200,150,200,45</entry>
 <entry key="table.font.italic">false</entry>
@@ -21,13 +21,13 @@
 <entry key="highlight.background">#000000</entry>
 <entry key="welcome.foreground">#000000</entry>
 <entry key="books.column.sizes">200,200,190,120,80</entry>
-<entry key="books.file.path">/books.dat</entry>
+<entry key="books.file.path">books.dat</entry>
 <entry key="main.foreground">#000000</entry>
-<entry key="music.file.path">/music.dat</entry>
+<entry key="music.file.path">music.dat</entry>
 <entry key="welcome.font.family">false</entry>
 <entry key="highlight.font.italic">true</entry>
 <entry key="highlight.font.family">false</entry>
 <entry key="main.background">#d6d9df</entry>
 <entry key="table.background">#ffffff</entry>
-<entry key="movies.file.path">/movies.dat</entry>
+<entry key="movies.file.path">movies.dat</entry>
 </properties>

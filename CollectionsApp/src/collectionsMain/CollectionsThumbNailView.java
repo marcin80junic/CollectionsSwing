@@ -4,27 +4,25 @@ import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.util.ArrayList;
+
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.filechooser.FileView;
 
 import collectableItems.AbstractItem;
-import collectableItems.AudioCD;
-import collectableItems.Book;
 import collectableItems.Collectable;
-import collectableItems.Game;
-import collectableItems.Movie;
 
 public class CollectionsThumbNailView extends FileView {
 
-	
-	private DataBase<? extends Collectable<? extends AbstractItem>> dataBase;
 	private Component observer;
 	
 	
 	public CollectionsThumbNailView(Component c) {
-		dataBase = new DataBase<>();
 		observer = c;
 	}
 	
@@ -44,13 +42,16 @@ public class CollectionsThumbNailView extends FileView {
 	}
 
 	@Override
-	public Icon getIcon(File f) {
-		
-		if(f.isDirectory()) return FileSystemView.getFileSystemView().getSystemIcon(f);
-		if(dataBase.loadCollection(f) != null) {
-			return new Icon16(dataBase.createImageIcon("/icons/Books.png", "books"));
-		}
-		return FileSystemView.getFileSystemView().getSystemIcon(f);
+	public Icon getIcon(File file) {
+		if(file.isDirectory()) return FileSystemView.getFileSystemView().getSystemIcon(file);
+		try(ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
+			ArrayList<?> list = (ArrayList<?>)ois.readObject();
+			@SuppressWarnings("unchecked")
+			Collectable<? extends AbstractItem> item = (Collectable<? extends AbstractItem>) list.get(0);
+			return new Icon16(item.createImageIcon(item.getIconPath(), "Icon"));
+		} catch (IOException e) { return FileSystemView.getFileSystemView().getSystemIcon(file); } 
+		catch (IndexOutOfBoundsException e) { return FileSystemView.getFileSystemView().getSystemIcon(file); } 
+		catch (ClassNotFoundException e) { return FileSystemView.getFileSystemView().getSystemIcon(file); }
 	}
 
 	@Override
@@ -68,11 +69,9 @@ public class CollectionsThumbNailView extends FileView {
 			i.getGraphics().drawImage(icon.getImage(), 0, 0, 16, 16, observer);
 			setImage(i);
 		}
-		
 		public void paintIcon(Component c, Graphics g, int x, int y) {
 			g.drawImage(getImage(), x, y, c);
 		}
-		
 		public int getIconHeight() { return 16; }
 		public int getIconWidth() { return 16; }
 	}
