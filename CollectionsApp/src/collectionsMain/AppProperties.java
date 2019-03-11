@@ -7,9 +7,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
-import javax.swing.JTable;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
 
 public class AppProperties extends Properties {
 
@@ -59,12 +56,12 @@ public class AppProperties extends Properties {
 			"highlight.font.family", "highlight.font.bold", "highlight.font.italic", "books.column.sizes", "games.column.sizes",
 			"movies.column.sizes", "music.column.sizes", "books.file.path", "games.file.path", "movies.file.path", "music.file.path"};
 	
-	private final File XML_FILE = new File("properties.xml");
-	private final File DEF_XML_FILE = new File("defaults.xml");
+	private File XML_FILE = new File("properties.xml");
+	private File DEF_XML_FILE = new File("defaults.xml");
 	
 	
 	public AppProperties() {
-		super();
+		super();this.
 		loadDefaults();
 		if(XML_FILE.isFile()) {
 			try(FileInputStream fis = new FileInputStream(XML_FILE)){
@@ -100,10 +97,10 @@ public class AppProperties extends Properties {
 			String[] defColumns = new String[COLUMN_SIZES_COUNT];
 			for(int i=0; i<defColumns.length; i++) {
 				int j = COLORS_COUNT+FONTS_PROP_COUNT+i;
-				if(j == BOOKS_COLUMN_SIZES) defColumns[i] = "200,200,190,120,80";
-				if(j == GAMES_COLUMN_SIZES) defColumns[i] = "225,200,150,200,45";
-				if(j == MOVIES_COLUMN_SIZES) defColumns[i] = "225,200,150,200,45";
-				if(j == MUSIC_COLUMN_SIZES) defColumns[i] = "225,220,200,45,45";
+				if(j == BOOKS_COLUMN_SIZES) defColumns[i] = "200,212,190,120,70";
+				if(j == GAMES_COLUMN_SIZES) defColumns[i] = "225,200,140,157,70";
+				if(j == MOVIES_COLUMN_SIZES) defColumns[i] = "225,200,140,157,70";
+				if(j == MUSIC_COLUMN_SIZES) defColumns[i] = "225,252,200,45,70";
 				defaults.put(KEYS[j], defColumns[i]);
 			}
 			String[] defPaths = new String[FILE_PATHS_COUNT];
@@ -124,13 +121,24 @@ public class AppProperties extends Properties {
 	
 	private void saveProperties() {
 		try(FileOutputStream out = new FileOutputStream(XML_FILE)){
-			super.storeToXML(out, "properties");
+			storeToXML(out, "properties");
 		} catch (IOException e) { e.printStackTrace(); }
 	}
 	
 	public void putProperty(int key, String value) {
 		if( key > (PROPERTIES_COUNT-1) || key < 0) throw new IllegalArgumentException("property is invalid");
-		super.put(KEYS[key], value);
+		put(KEYS[key], value);
+		saveProperties();
+	}
+	
+	public void putProperty(int key, int[] values) {
+		if( key > (PROPERTIES_COUNT-1) || key < 0) throw new IllegalArgumentException("property is invalid");
+		StringBuilder value = new StringBuilder();
+		for(int i=0; i<values.length; i++) {
+			value.append(values[i]);
+			if(i != values.length-1) value.append(',');
+		}
+		put(KEYS[key], value.toString());
 		saveProperties();
 	}
 	
@@ -167,33 +175,9 @@ public class AppProperties extends Properties {
 		return widths;
 	}
 	
-	public void setColumnSizes(int columnSizes, JTable table) {
-		if(columnSizes != BOOKS_COLUMN_SIZES && columnSizes != GAMES_COLUMN_SIZES && columnSizes != MOVIES_COLUMN_SIZES &&
-				columnSizes != MUSIC_COLUMN_SIZES) throw new IllegalArgumentException("property is invalid");
-		String[] columns = getProperty(KEYS[columnSizes]).split(",");
-		TableColumnModel model = table.getColumnModel();
-		TableColumn column = null;
-		for(int i=0; i<columns.length; i++) {
-			column = model.getColumn(i);
-			if(i == 0) {
-				if(table.getRowCount() < 10) column.setMaxWidth(15);
-				else if(table.getRowCount() < 100) column.setPreferredWidth(25);
-				else if(table.getRowCount() < 1000) column.setPreferredWidth(35);
-				else if(table.getRowCount() < 10000) column.setPreferredWidth(45);
-			} else if(i == columns.length-1) {
-				column.setMinWidth(Integer.valueOf(columns[i-1]));
-				column.setMaxWidth(Integer.valueOf(columns[i-1]));
-			} else {
-				column.setMinWidth(50);
-				column.setPreferredWidth(Integer.valueOf(columns[i-1]));
-				column.setMaxWidth(300);
-			}
-		}
-	}
-	
 	public void removeProperty(int key) {
 		if( key > (PROPERTIES_COUNT-1) || key < 0) throw new IllegalArgumentException("property is invalid");
-		super.remove(KEYS[key]);
+		remove(KEYS[key]);
 		saveProperties();
 	}
 	

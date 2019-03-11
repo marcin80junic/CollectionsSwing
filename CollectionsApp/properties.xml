@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>properties</comment>
+<entry key="music.column.sizes">207,322,140,59,64</entry>
+<entry key="movies.column.sizes">234,211,123,159,65</entry>
+<entry key="books.column.sizes">178,252,161,131,70</entry>
+<entry key="games.column.sizes">217,193,145,167,70</entry>
+</properties>

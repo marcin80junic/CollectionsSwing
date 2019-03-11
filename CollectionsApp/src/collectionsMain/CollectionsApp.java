@@ -80,7 +80,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 	private JTable table, comboHeaderTable;
 	private TableModelCollection<? extends Collectable<? extends AbstractItem>> tableModel;
 	private ListSelectionModel listSelectionModel;
-	private TableMouseListener mice;
+	private TableMouseListener tableMouseListener, headerMouseListener;
 	private TableModelComboHeader comboHeaderModel;
 	private int[] columnWidths;
 	private JPopupMenu popupMenu;
@@ -277,7 +277,6 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 		centralPane.setPreferredSize(new Dimension(805, 500));
 		welcomePaneInit();
 		toolbarPaneInit();
-		//tableInit();
 		btnPaneInit();
 		centralPaneUpdate();
 	}
@@ -340,7 +339,6 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 	
 	private void tableInit() {
 		table = new JTable(tableModel = dataBase.getTableModel());
-		tableModel.addTableModelListener((e) -> table.repaint());
 		table.setColumnModel(dataBase.getTableColumnModel(table));
 		table.getActionMap().put("delete item", removeAction);
 		table.getActionMap().put("edit item", editAction);
@@ -350,8 +348,8 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 		table.getInputMap().put(KeyStroke.getKeyStroke("SPACE"), "display popupMenu");
 		tablePopupMenuInit();
 		table.setComponentPopupMenu(popupMenu);
-		if(mice != null) table.removeMouseListener(mice);
-		table.addMouseListener(mice = new TableMouseListener(this, table, dataBase));
+		if(tableMouseListener != null) table.removeMouseListener(tableMouseListener);
+		table.addMouseListener(tableMouseListener = new TableMouseListener(this, table, dataBase));
 		table.setBackground(tableBackground);
 		table.setDefaultRenderer(String.class, new TableRendererCollection());
 		table.setFillsViewportHeight(true);
@@ -372,19 +370,10 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 		comboHeaderTable.setRowHeight(22);
 		comboHeaderTable.setRowSelectionAllowed(false);
 		comboHeaderTable.setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
-		comboHeaderTable.getTableHeader().setReorderingAllowed(false);
-		comboHeaderTable.getTableHeader().addMouseListener(new MouseAdapter() {
-			@Override
-		    public void mouseClicked(MouseEvent e) {
-				int columnIndex = comboHeaderTable.columnAtPoint(e.getPoint());
-				if(columnIndex == 0) return;
-				TableHeaderRenderer hr = (TableHeaderRenderer) comboHeaderTable.getColumnModel().getColumn(columnIndex).getHeaderRenderer();
-				if(hr.isAscIcon()) tableModel.sort(columnIndex, true);
-				else tableModel.sort(columnIndex, false);
-				comboHeaderTable.getTableHeader().repaint();
-			}
-		});
 		dataBase.setColumnWidths(table.getRowCount(), columnWidths);
+		comboHeaderTable.getTableHeader().setReorderingAllowed(false);
+		if(headerMouseListener != null) comboHeaderTable.getTableHeader().removeMouseListener(headerMouseListener);
+		comboHeaderTable.getTableHeader().addMouseListener(headerMouseListener = new TableMouseListener(this, comboHeaderTable, dataBase));
 		JScrollPane comboHeaderScroll = new JScrollPane(comboHeaderTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER, 
 					ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		comboHeaderScroll.setBorder(null);
@@ -705,7 +694,14 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 	}
 	
 	DataBase<? extends Collectable<? extends AbstractItem>> getDataBase(){ return dataBase; }
-	
+	int[] getColumnWidths() { return columnWidths; }
+	void setColumnWidths(int[] widths) {
+		columnWidths = widths;
+		if(booksFlag) properties.putProperty(AppProperties.BOOKS_COLUMN_SIZES, columnWidths);
+		else if(gamesFlag) properties.putProperty(AppProperties.GAMES_COLUMN_SIZES, columnWidths);
+		else if(moviesFlag) properties.putProperty(AppProperties.MOVIES_COLUMN_SIZES, columnWidths);
+		else if(musicFlag) properties.putProperty(AppProperties.MUSIC_COLUMN_SIZES, columnWidths);
+	}
 	static String getSearchText() { return search;	}
 	static Color getMainBackground() { return mainBackground; }
 	static Color getMainForeground() { return mainForeground; }
@@ -941,7 +937,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 				if(option==JOptionPane.YES_OPTION) {
 					tableModel.removeItem(item, row);
 					if(String.valueOf(tableModel.getRowCount()+1).length() != String.valueOf(tableModel.getRowCount()).length()) 
-						tableUpdate();
+						columnsUpdate();
 					tableUpdate();
 				} else return;	
 			}
