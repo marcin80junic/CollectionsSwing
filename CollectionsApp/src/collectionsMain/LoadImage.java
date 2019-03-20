@@ -17,7 +17,7 @@ class LoadImage extends Component implements Icon {
 	String path;
 	
 	public LoadImage(String path) {
-		this.setFocusable(true);
+		setFocusable(true);
 		this.path = path;
 		try {
 			image = ImageIO.read(new File(path));
@@ -70,7 +70,7 @@ class LoadImage extends Component implements Icon {
 	}
 	
 	public void rotateClockwise90() {
-		BufferedImage src = this.image;
+		BufferedImage src = image;
 	    int w = src.getWidth();
 	    int h = src.getHeight();
 	    int a;
@@ -81,24 +81,16 @@ class LoadImage extends Component implements Icon {
 	            dest.setRGB(x,y,src.getRGB(y,a++));
 	        }
 	    }
-	    this.image = dest;
+	    image = dest;
 	}
 
 	@Override
-	public void paintIcon(Component c, Graphics g, int x, int y) {
-
-		g.drawImage(image, x, y, c);
-	}
+	public void paintIcon(Component c, Graphics g, int x, int y) { g.drawImage(image, x, y, c);	}
 
 	@Override
-	public int getIconWidth() {
-		
-		return image.getWidth();
-	}
+	public int getIconWidth() { return image.getWidth(); }
 
 	@Override
-	public int getIconHeight() {
-
-		return image.getHeight();
-	}
+	public int getIconHeight() { return image.getHeight(); }
+	
 }

@@ -53,6 +53,8 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+
 import collectableItems.AbstractItem;
 import collectableItems.AudioCD;
 import collectableItems.Book;
@@ -79,7 +81,6 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 	private JButton[] navigationButtons;
 	private JTable table, comboHeaderTable;
 	private TableModelCollection<? extends Collectable<? extends AbstractItem>> tableModel;
-	private ListSelectionModel listSelectionModel;
 	private TableMouseListener tableMouseListener, headerMouseListener;
 	private TableModelComboHeader comboHeaderModel;
 	private int[] columnWidths;
@@ -87,7 +88,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 	private JToolBar mainToolBar, detailToolBar;
 	private JPanel welcomePane, homeBottom, shortcutPane, westPane, centralPane, btnPane, navigationPane, eastPane, searchPane, detailPanel,
 			detailItemPanel, toolbarPane, pane;
-	private boolean homeFlag, booksFlag, musicFlag, moviesFlag, gamesFlag, selectionFlag;
+	private boolean homeFlag, booksFlag, musicFlag, moviesFlag, gamesFlag;
 	private Border lowered, raised;
 	private CollectionsAction addAction, editAction, removeAction, upAction, downAction, clearAction, resetAction, findAction,
 			displayPopupMenuAction,	exitAction, helpAction,
@@ -97,8 +98,6 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 	private JTextPane titleText;
 	private static String search = "";
 	private SearchField tfSearch;
-	private Object element;
-	
 	
 	CollectionsApp() {
 		super ("Collections");
@@ -141,6 +140,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 		contentPane.add(centralPane, cp);
 		contentPane.add(navigationPane, np);
 		contentPane.add(eastPane, ep);
+		setContentPane(new JScrollPane(contentPane));
 		pack();
 		setLocationRelativeTo(null);
 		setVisible(true);
@@ -339,6 +339,20 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 	
 	private void tableInit() {
 		table = new JTable(tableModel = dataBase.getTableModel());
+		tableModel.addTableModelListener((e) -> {
+			int rows = tableModel.getRowCount();
+			if(((e.getType()==TableModelEvent.INSERT) && (String.valueOf(rows-1).length() != String.valueOf(rows).length())) ||
+			   ((e.getType()==TableModelEvent.DELETE) && (String.valueOf(rows+1).length() != String.valueOf(rows).length())) ||
+			   (e.getType()==TableModelEvent.UPDATE)) {
+				dataBase.setColumnWidths(rows, columnWidths);
+				dataBase.setColumnWidths(rows, columnWidths);
+			}
+			if((e.getType()==TableModelEvent.UPDATE) && tableModel.isFiltered()) tableUpdate();
+			if((e.getType()==TableModelEvent.INSERT) && tableModel.isFiltered()) comboHeaderModel.resetModels();
+			saveAction.setEnabled(!tableModel.isFiltered() && tableModel.isChanged());
+			saveAllAction.setEnabled(areCollectionsChanged());
+			resetAction.setEnabled(tableModel.isChanged()); 
+		});
 		table.setColumnModel(dataBase.getTableColumnModel(table));
 		table.getActionMap().put("delete item", removeAction);
 		table.getActionMap().put("edit item", editAction);
@@ -355,8 +369,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 		table.setFillsViewportHeight(true);
 		table.setSelectionMode(0);
 		table.setTableHeader(null);
-		listSelectionModel = table.getSelectionModel();
-		listSelectionModel.addListSelectionListener(this);
+		table.getSelectionModel().addListSelectionListener(this);
 		JScrollPane tableScroll = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, 
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		tableScroll.getVerticalScrollBar().setPreferredSize(new Dimension(20, 0));
@@ -384,26 +397,17 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 		pane.setLayout(new BorderLayout());
 		pane.add(comboHeaderView, BorderLayout.PAGE_START);
 		pane.add(tableScroll, BorderLayout.CENTER);
-	}
-	
-	void columnsUpdate() {
-		dataBase.setColumnWidths(tableModel.getRowCount(), columnWidths);
-		dataBase.setColumnWidths(tableModel.getRowCount(), columnWidths);
-	}
+	}	
 	
 	void tableUpdate() {
-		if(tableModel.getRowCount() == 0) {
-			tableModel.reloadTableModel();
-			comboHeaderModel.resetModel();
-		} 
+		if(tableModel.getRowCount()==0) comboHeaderModel.resetModels(); 
 		else {
 			comboHeaderModel.resetComboFlags();
-			comboHeaderModel.updateComboLists();		
+			comboHeaderModel.updateComboLists();
 		}
 	}
 	
 	private void toolbarPaneInit() {
-		
 		toolbarPane = new JPanel();
 		toolbarPane.setLayout(new BorderLayout());
 		toolbarPane.setPreferredSize(new Dimension(805, 35));
@@ -468,29 +472,20 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 		navigationPane.repaint();
 	}
 	
-	
 	private void eastPaneInit() {
-		
 		eastPane = new JPanel();
-		eastPane.setBorder(BorderFactory.createEmptyBorder(5, 0, 0,	5));
 		eastPane.setLayout(new BorderLayout());
-		
+		eastPane.setPreferredSize(new Dimension(300, -1));
 		searchPane = new JPanel();
+		searchPane.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
 		searchPane.setOpaque(false);
-		searchPane.setBorder(BorderFactory.createEmptyBorder(0,0,5,0));
-		searchPane.setLayout(new BoxLayout(searchPane, BoxLayout.LINE_AXIS));
-		searchPane.setMaximumSize(new Dimension(200, 25));
 		lblSearch = new JLabel("Search for: ");
 		lblSearch.setFont(mainFont);
 		lblSearch.setLabelFor(tfSearch);
 		lblSearch.setDisplayedMnemonic('h');
 		tfSearch = new SearchField(this, (Icon)findAction.getValue(Action.SMALL_ICON));
-		tfSearch.setMaximumSize(new Dimension(150, 30));
-		searchPane.add(Box.createHorizontalStrut(100));
 		searchPane.add(lblSearch).setForeground(mainForeground);
-		searchPane.add(tfSearch);
-		searchPane.add(Box.createHorizontalStrut(100));
-		
+		searchPane.add(tfSearch);		
 		detailPanel = new JPanel(new BorderLayout());
 		detailPanel.setBorder(raised);
 		detailPanel.setBackground(welcomeBackground);
@@ -498,60 +493,57 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 		detailTitle.setFont(welcomeFont.deriveFont(Font.BOLD, 25f));
 		detailTitle.setForeground(welcomeForeground);
 		detailItemPanel = new JPanel(new BorderLayout());
-		detailItemPanel.setPreferredSize(new Dimension(100, 100));
 		detailItemPanel.setBackground(welcomeBackground);
 		titleText = new JTextPane();
 		titleText.setEditable(false);
 		detailItemPanel.add(titleText, BorderLayout.PAGE_START);
-		
 		detailPanel.add(detailTitle, BorderLayout.PAGE_START);
-		JScrollPane scroll = new JScrollPane(detailItemPanel);
-		scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		detailPanel.add(scroll, BorderLayout.CENTER);
-		
+		detailPanel.add(new JScrollPane(detailItemPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
 		JPanel toolPane = new JPanel();
 		toolPane.setLayout(new BorderLayout());
-		toolPane.setPreferredSize(new Dimension(200, 60));
+		toolPane.setPreferredSize(new Dimension(200, 65));
 		detailToolBar = new JToolBar();
 		toolPane.add(detailToolBar);
-		
 		eastPane.add(searchPane, BorderLayout.PAGE_START);
 		eastPane.add(detailPanel, BorderLayout.CENTER);
 		eastPane.add(toolPane, BorderLayout.PAGE_END);
-		detailPaneUpdate();
+		detailPaneUpdate(true);
 	}
 	
-	private void detailPaneUpdate() {
-		
+	private void detailPaneUpdate(boolean selectionEmpty) {
 		updateDetailPanelComponentsAppearance();
-		
+		detailItemPanel.removeAll();
+		detailItemPanel.repaint();
 		if (homeFlag) {
 			detailTitle.setText("Welcome...");
+			return;
 		}
-		else if (booksFlag) {
-			detailTitle.setText("Books Collection");
-			if (!table.getSelectionModel().isSelectionEmpty()) {
+		else {
+			detailTitle.setText(dataBase.getName()+"s Collection");
+		}
+		if(selectionEmpty) {
+			
+		}
+		else {
+			if (booksFlag) {
 				Book book = (Book) tableModel.getItem(table.getSelectedRow());
 				BookStyledDocument bsd = new BookStyledDocument(book);
 				titleText.setStyledDocument(bsd);
+				detailItemPanel.add(titleText);
+			}
+			else if (musicFlag) {
+				
+			}
+			else if (gamesFlag) {
+				
+			}
+			else if (moviesFlag) {
+				
 			}
 		}
-		else if (musicFlag) {
-			detailTitle.setText("Audio Collection");
-			
-		}
-		else if (gamesFlag) {
-			detailTitle.setText("Games Collection");
-		}
-		else if (moviesFlag) {
-			detailTitle.setText("Movies Collection");
-		}
-		eastPane.revalidate();
-		eastPane.repaint();
 	}
 	
 	private void updateDetailPanelComponentsAppearance() {
-		
 		if(homeFlag) {
 			detailPanel.setBackground(welcomeBackground);
 			detailItemPanel.setBackground(welcomeBackground);
@@ -590,18 +582,15 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 		gamesAction = new CollectionsAction("Games Collection", gamesIcon, null, "games", 'G', true);
 		moviesAction = new CollectionsAction("Movies Collection", moviesIcon, null, "movies", 'V', true);
 		addAction = new CollectionsAction("Add", null, null, "add", 'A', false);
-		//addAction.putValue(Action.SHORT_DESCRIPTION, "Adds new "+dataBase.getName());
 		editAction = new CollectionsAction("Edit", null, null, "edit", 'E', false);
-		//editAction.putValue(Action.SHORT_DESCRIPTION, "Edits highlighted "+dataBase.getName());
 		removeAction = new CollectionsAction("Remove", null, null, "remove", 'R', false);
-		//removeAction.putValue(Action.SHORT_DESCRIPTION, "Removes highlighted "+dataBase.getName());
 		saveAction = new CollectionsAction("Save", null, saveIcon, "save", 'S', false);
 		saveAction.putValue(Action.SHORT_DESCRIPTION, "Saves changes in current collection");
 		saveAllAction = new CollectionsAction("Save All", null, saveAllIcon, "saveAll", 'L', false);
 		saveAllAction.putValue(Action.SHORT_DESCRIPTION, "Saves changes in all collections");
 		clearAction = new CollectionsAction("Clear Selection", null, null, "clear", 'C', false);
 		clearAction.putValue(Action.SHORT_DESCRIPTION, "Clears current selection");
-		resetAction = new CollectionsAction("Reset", null, null, "reset", 'T', true);
+		resetAction = new CollectionsAction("Reset", null, null, "reset", 'T', false);
 		resetAction.putValue(Action.SHORT_DESCRIPTION, "Resets current collection");
 		findAction = new CollectionsAction("Find...", null, searchIcon, "search", 'F', true);
 		findAction.putValue(Action.SHORT_DESCRIPTION, "Search for..");
@@ -638,18 +627,18 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 			exportAction.setEnabled(false);
 		}
 		addAction.setEnabled(homeFlag? false: true);
-		editAction.setEnabled(listSelectionModel.isSelectionEmpty()? false: true);
-		removeAction.setEnabled(listSelectionModel.isSelectionEmpty()? false: true);
+		editAction.setEnabled(table.getSelectionModel().isSelectionEmpty()? false: true);
+		removeAction.setEnabled(table.getSelectionModel().isSelectionEmpty()? false: true);
 		if(!tableModel.isChanged()) saveAction.setEnabled(false);
 		if(!areCollectionsChanged()) saveAllAction.setEnabled(false);
-		clearAction.setEnabled(listSelectionModel.isSelectionEmpty()? false: true);
-		resetAction.setEnabled(homeFlag? false: true);
+		clearAction.setEnabled(table.getSelectionModel().isSelectionEmpty()? false: true);
 		upAction.setEnabled(false);
 		downAction.setEnabled(false);
+		saveAction.setEnabled(!tableModel.isFiltered() && tableModel.isChanged());
+		saveAllAction.setEnabled(areCollectionsChanged());
 	}
 	
 	private void switchCollection() {
-		
 		search = "";
 		if(!homeFlag) {
 			tableInit();
@@ -658,31 +647,18 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 		westPaneUpdate();
 		centralPaneUpdate();
 		navigationPaneUpdate();
-		detailPaneUpdate();
-		setJMenuBar(createMenuBar());
+		detailPaneUpdate(table.getSelectionModel().isSelectionEmpty());
 	}
 	
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
 		ListSelectionModel lsm = (ListSelectionModel)e.getSource();
-		if(!lsm.isSelectionEmpty()) {
-			editAction.setEnabled(true);
-			removeAction.setEnabled(true);
-			clearAction.setEnabled(true);
-			upAction.setEnabled(true);
-			downAction.setEnabled(true);
-			if((element == null) || 
-					((element != null) && !(selectionFlag) && !(element.equals(tableModel.getItem(lsm.getAnchorSelectionIndex()))))) {
-				detailPaneUpdate();
-			} else selectionFlag = false;
-			element = tableModel.getItem(lsm.getAnchorSelectionIndex());
-		} else {	
-			editAction.setEnabled(false);
-			removeAction.setEnabled(false);
-			clearAction.setEnabled(false);
-			upAction.setEnabled(false);
-			downAction.setEnabled(false);
-		}
+		editAction.setEnabled(!lsm.isSelectionEmpty());
+		removeAction.setEnabled(!lsm.isSelectionEmpty());
+		clearAction.setEnabled(!lsm.isSelectionEmpty());
+		upAction.setEnabled(!lsm.isSelectionEmpty());
+		downAction.setEnabled(!lsm.isSelectionEmpty());
+		detailPaneUpdate(lsm.isSelectionEmpty());		
 	}
 	
 	void searchFor() {
@@ -694,14 +670,9 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 	}
 	
 	DataBase<? extends Collectable<? extends AbstractItem>> getDataBase(){ return dataBase; }
+	AppProperties getProperties() { return properties; }
 	int[] getColumnWidths() { return columnWidths; }
-	void setColumnWidths(int[] widths) {
-		columnWidths = widths;
-		if(booksFlag) properties.putProperty(AppProperties.BOOKS_COLUMN_SIZES, columnWidths);
-		else if(gamesFlag) properties.putProperty(AppProperties.GAMES_COLUMN_SIZES, columnWidths);
-		else if(moviesFlag) properties.putProperty(AppProperties.MOVIES_COLUMN_SIZES, columnWidths);
-		else if(musicFlag) properties.putProperty(AppProperties.MUSIC_COLUMN_SIZES, columnWidths);
-	}
+	void setColumnWidths(int[] widths) { columnWidths = widths; }
 	static String getSearchText() { return search;	}
 	static Color getMainBackground() { return mainBackground; }
 	static Color getMainForeground() { return mainForeground; }
@@ -723,8 +694,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 		homeFlag = booksFlag = musicFlag = moviesFlag = gamesFlag = false;
 	}
 	
-	
-	boolean areCollectionsChanged() {
+	private boolean areCollectionsChanged() {
 		boolean books, audio, games, movies;
 		books = audio = games = movies = false;
 		if(booksCollection != null) books = booksCollection.getTableModel().isChanged();
@@ -734,29 +704,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 		return (books || audio || games || movies);
 	}
 	
-	
-	boolean areOtherCollectionsChanged(DataBase<? extends Collectable<? extends AbstractItem>> collection) {
-		
-		boolean books, audio, games, movies;
-		books = audio = games = movies = false;
-		if(!collection.equals(booksCollection)) {
-			if(booksCollection != null) books = booksCollection.getTableModel().isChanged();
-		}
-		if(!collection.equals(musicCollection)) {
-			if(musicCollection != null) audio = musicCollection.getTableModel().isChanged();
-		}
-		if(!collection.equals(gamesCollection)) {
-			if(gamesCollection != null) games = gamesCollection.getTableModel().isChanged();
-		}
-		if(!collection.equals(moviesCollection)) {
-			if(moviesCollection != null) movies = moviesCollection.getTableModel().isChanged();
-		}
-		return (books || audio || games || movies);
-	}
-	
-	
 	private void saveAllCollections() {
-		
 		if(booksCollection != null) {
 			if(booksCollection.getTableModel().isChanged()) {
 				booksCollection.saveToFile();
@@ -781,15 +729,12 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 		saveAllAction.setEnabled(false);
 	}
 	
-	
 	public void clearSelection() {
 		tfSearch.setText("");
 		search = "";
 		table.clearSelection();
-		detailPaneUpdate();
-		element = null;
+		detailPaneUpdate(true);
 	}
-	
 	
 	public ImageIcon createImageIcon(String path, String description) {
 		URL imgURL = getClass().getResource(path);
@@ -801,11 +746,8 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 		}
 	}
 	
-	
-	void updateAppearance(String element) {
-		
-		propertiesInit();
-		
+	void updateAppearance(String element) {	
+		propertiesInit();	
 		if(element.equals("Application's Frame")) {
 			SwingUtilities.updateComponentTreeUI(this);
 			SwingUtilities.updateComponentTreeUI(settings);
@@ -816,7 +758,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 			lblSearch.setFont(mainFont);
 			lblSearch.setForeground(mainForeground);
 			tableInit();
-			if(!homeFlag) tableUpdate();
+			if(!homeFlag) tableInit();
 			centralPaneUpdate();
 			titleLine1.setFont(welcomeFont);
 			titleLine2.setFont(welcomeFont);
@@ -845,7 +787,6 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 	}
 	
 	private void updateButtonListeners(Component[] buttons, Color background, Color foreground, Font font) {
-		
 		for(int i=0; i<buttons.length; i++) {
 			buttons[i].setForeground(foreground);
 			buttons[i].setFont(font);
@@ -936,8 +877,6 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 						"?\n\n"+item.toString() +"\n\n", "Confirm to remove", JOptionPane.YES_NO_OPTION);
 				if(option==JOptionPane.YES_OPTION) {
 					tableModel.removeItem(item, row);
-					if(String.valueOf(tableModel.getRowCount()+1).length() != String.valueOf(tableModel.getRowCount()).length()) 
-						columnsUpdate();
 					tableUpdate();
 				} else return;	
 			}
@@ -984,12 +923,9 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 							+ "\ndo you want to continue anyway?", "Confirm reset", JOptionPane.YES_NO_OPTION);
 					if(confirm == JOptionPane.NO_OPTION) return;
 					clearSelection();
-					tableModel.reloadTableModel();
-					comboHeaderModel.resetModel();
+					comboHeaderModel.resetModels();
 					saveAction.setEnabled(false);
-					if(!areOtherCollectionsChanged(dataBase)) {
-						saveAllAction.setEnabled(false);
-					}
+					saveAllAction.setEnabled(areCollectionsChanged());
 				}
 			}
 			else if(ae.getActionCommand().equals("find")) {
@@ -1135,9 +1071,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 				Appearance chooser = new Appearance(CollectionsApp.this, properties);
 				tabs.add("Appearance", chooser);
 				
-				ok.addActionListener((e) -> {
-					settings.setVisible(false);
-				});
+				ok.addActionListener((e) -> settings.setVisible(false));
 				cancel.addActionListener((e) -> settings.setVisible(false));
 				apply.addActionListener((e) -> {
 					if(tabs.getSelectedComponent().equals(chooser)) chooser.apply();

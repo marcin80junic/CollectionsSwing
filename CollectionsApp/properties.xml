@@ -2,8 +2,7 @@
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
 <comment>properties</comment>
-<entry key="music.column.sizes">207,322,140,59,64</entry>
-<entry key="movies.column.sizes">234,211,123,159,65</entry>
-<entry key="books.column.sizes">178,252,161,131,70</entry>
-<entry key="games.column.sizes">217,193,145,167,70</entry>
+<entry key="game.column.sizes">233,188,140,157,70</entry>
+<entry key="audiocd.column.sizes">225,252,187,58,70</entry>
+<entry key="book.column.sizes">200,212,190,119,71</entry>
 </properties>

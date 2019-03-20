@@ -13,10 +13,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.util.Enumeration;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -29,15 +26,11 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.text.Style;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
+import javax.swing.text.SimpleAttributeSet;
 
 public class Appearance extends JPanel implements ChangeListener, ActionListener, ListSelectionListener {
 
@@ -47,59 +40,60 @@ public class Appearance extends JPanel implements ChangeListener, ActionListener
 	private JPanel previewPanel;
 	private JList<String> list;
 	private JColorChooser colorChooser;
-	private JLabel preview, colorPreview;
-	private JButton background, foreground;
-	private JCheckBox bold, italic;
-	private JTextField fontSize;
+	private JLabel textPreview, boxPreview;
+	private JButton btnBackground, btnForeground;
+	private JCheckBox checkBold, checkItalic;
 	private JComboBox<String> fontChooser;
 	private Color newColor;
 	private Font newFont;
+	private SimpleAttributeSet[] attributes;
+	private int index;
 	
 	
 	public Appearance(CollectionsApp app, AppProperties props) {
-
 		parent = app;
 		properties = props;
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+		initAttributes();
 		add(colorChooserInit());
 		add(fontPanelInit());
 	}
 	
 	private JPanel colorChooserInit() {
 		
-		JPanel color = new JPanel();
-		color.setLayout(new BorderLayout());
+		JPanel colorPane = new JPanel();
+		colorPane.setLayout(new BorderLayout());
 		colorChooser = new JColorChooser();
 		colorChooser.setPreviewPanel(previewPanelInit());
 		colorChooser.getSelectionModel().addChangeListener(this);
 		newColor = colorChooser.getColor();
-		color.add(colorChooser, BorderLayout.CENTER);
-		return color;
+		colorPane.add(colorChooser, BorderLayout.CENTER);
+		return colorPane;
 	}
 	
 	private JPanel previewPanelInit() {
 		
-		JPanel west = new JPanel();
-		west.setLayout(new BorderLayout());
-		west.setOpaque(false);
+		JPanel westPane = new JPanel();
+		westPane.setLayout(new BorderLayout());
+		westPane.setOpaque(false);
 		String[] elements = new String[] {"Application's Frame", "Welcome Screen", "Table", "Highlight Style"};
 		list = new JList<>(elements);
-		list.setSelectedIndex(0);
+		index = 0;
+		list.setSelectedIndex(index);
 		list.setPreferredSize(new Dimension(120, 40));
 		list.addListSelectionListener(this);
 		JScrollPane listScroll = new JScrollPane(list);
-		west.add(listScroll, BorderLayout.CENTER);
+		westPane.add(listScroll, BorderLayout.CENTER);
 		
-		style = sc.getStyle(styleNames[0]);
-		preview = new JLabel("sample text...", JLabel.CENTER);
-		preview.setPreferredSize(new Dimension(340, 40));
-		preview.setFont(sc.getFont(style));
-		preview.setForeground(sc.getForeground(style));
-		background = new JButton("Set Background");
-		foreground = new JButton("Set Font Color");
-		background.addActionListener(this);
-		foreground.addActionListener(this);
-		colorPreview = new JLabel(new ColorBox(50));
+		textPreview = new JLabel("sample text...", JLabel.CENTER);
+		textPreview.setPreferredSize(new Dimension(340, 40));
+		textPreview.setFont(CollectionsApp.getMainFont());
+		textPreview.setForeground(CollectionsApp.getMainForeground());
+		btnBackground = new JButton("Set Background");
+		btnForeground = new JButton("Set Font Color");
+		btnBackground.addActionListener(this);
+		btnForeground.addActionListener(this);
+		boxPreview = new JLabel(new ColorBox(50));
 		
 		JPanel east = new JPanel();
 		east.setOpaque(false);
@@ -107,19 +101,19 @@ public class Appearance extends JPanel implements ChangeListener, ActionListener
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 1; c.gridy = 0;
-		east.add(foreground, c);
+		east.add(btnForeground, c);
 		c.gridx = 1; c.gridy = 1;
-		east.add(background, c);
+		east.add(btnBackground, c);
 		c.gridx = 0; c.gridy = 0;
 		c.gridheight = 2; c.insets = new Insets(0,0,0,20);
-		east.add(colorPreview, c);
+		east.add(boxPreview, c);
 		
 		previewPanel = new JPanel();
 		previewPanel.setLayout(new BorderLayout());
 		previewPanel.setPreferredSize(new Dimension(630, 85));
-		previewPanel.setBackground(sc.getBackground(style));
-		previewPanel.add(preview, BorderLayout.CENTER);
-		previewPanel.add(west, BorderLayout.LINE_START);
+		previewPanel.setBackground(CollectionsApp.getMainBackground());
+		previewPanel.add(textPreview, BorderLayout.CENTER);
+		previewPanel.add(westPane, BorderLayout.LINE_START);
 		previewPanel.add(east, BorderLayout.LINE_END);
 		return previewPanel;
 	}
@@ -134,34 +128,24 @@ public class Appearance extends JPanel implements ChangeListener, ActionListener
 		fontSettings.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Font Settings"));
 		
 		GraphicsEnvironment e = GraphicsEnvironment.getLocalGraphicsEnvironment();
-		Font[] fonts = e.getAllFonts();
-		String[] fontNames = new String[fonts.length];
-		for(int i=0; i<fonts.length; i++) fontNames[i] = fonts[i].getFontName();
-		
-		fontChooser = new JComboBox<>(fontNames);
+		fontChooser = new JComboBox<>(e.getAvailableFontFamilyNames());
 		fontChooser.setActionCommand("Font Chooser");
 		fontChooser.addActionListener(this);
-		fontSize = new JTextField(2);
-		fontSize.setHorizontalAlignment(SwingConstants.TRAILING);
-		fontSize.setActionCommand("Font Size");
-		fontSize.addActionListener(this);
-		bold = new JCheckBox("Bold");
-		bold.setFont(getFont().deriveFont(Font.BOLD));
-		bold.addActionListener(this);
-		italic = new JCheckBox("Italic");
-		italic.setFont(getFont().deriveFont(Font.ITALIC));
-		italic.addActionListener(this);
-		newFont = sc.getFont(style);
+		checkBold = new JCheckBox("Bold");
+		checkBold.setFont(getFont().deriveFont(Font.BOLD));
+		checkBold.addActionListener(this);
+		checkItalic = new JCheckBox("Italic");
+		checkItalic.setFont(getFont().deriveFont(Font.ITALIC));
+		checkItalic.addActionListener(this);
+		newFont = CollectionsApp.getMainFont();
 		updateFontSettings();
 		
 		combo.add(new JLabel("Choose font: "));
 		combo.add(fontChooser);
-		text.add(new JLabel("Font size: "));
-		text.add(fontSize);
 		fontSettings.add(combo);
 		fontSettings.add(text);
-		fontSettings.add(bold);
-		fontSettings.add(italic);
+		fontSettings.add(checkBold);
+		fontSettings.add(checkItalic);
 		bottomPanel.add(fontSettings);
 		return bottomPanel;
 	}
@@ -170,136 +154,105 @@ public class Appearance extends JPanel implements ChangeListener, ActionListener
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-		if(e.getActionCommand().equals("Set Background")) {
-			previewPanel.setBackground(newColor);
-			previewPanel.repaint();
-			StyleConstants.setBackground(style, newColor);
-		}
-		else if(e.getActionCommand().equals("Set Font Color")) {
-			preview.setForeground(newColor);
-			preview.repaint();
-			StyleConstants.setForeground(style, newColor);
-		}
+		if(e.getActionCommand().equals("Set Background")) {	previewPanel.setBackground(newColor); }
+		else if(e.getActionCommand().equals("Set Font Color")) { textPreview.setForeground(newColor); }
 		else if(e.getActionCommand().equals("Font Chooser")) {
 			String fontName = (String) fontChooser.getSelectedItem();
-			int size = Integer.parseInt(fontSize.getText());
-			bold.setSelected(false);
-			italic.setSelected(false);
-			if( fontName.toLowerCase().contains("bold") ) {
-				bold.setSelected(true);
-				bold.setEnabled(false);
-			} 
-			else {
-				bold.setEnabled(true);
-			}
-			if( fontName.toLowerCase().contains("italic") ) {
-				italic.setSelected(true);
-				italic.setEnabled(false);
-			}
-			else {
-				italic.setEnabled(true);
-			}
-			newFont = new Font(fontName, (bold.isSelected()? Font.BOLD: 0) | (italic.isSelected()? Font.ITALIC: 0), size);
-			preview.setFont(newFont);
-			preview.repaint();
-			StyleConstants.setFontFamily(style, fontName);
-			StyleConstants.setBold(style, bold.isSelected());
-			StyleConstants.setItalic(style, italic.isSelected());
+			checkBold.setSelected(false);
+			checkItalic.setSelected(false);
+			newFont = new Font(fontName, (checkBold.isSelected()? Font.BOLD: 0) | (checkItalic.isSelected()? Font.ITALIC: 0), 12);
+			textPreview.setFont(newFont);
 		}
-		else if(e.getActionCommand().equals("Font Size")) {
-			float size = Float.parseFloat(fontSize.getText());
-			newFont = preview.getFont().deriveFont(size);
-			preview.setFont(newFont);
-			preview.repaint();
-			StyleConstants.setFontSize(style, (int)size);
-		}
-		else if(e.getActionCommand().equals("Bold")) {
-			newFont = preview.getFont().deriveFont((bold.isSelected()? Font.BOLD: 0) | (italic.isSelected()? Font.ITALIC: 0));
-			preview.setFont(newFont);
-			preview.repaint();
-			StyleConstants.setBold(style, bold.isSelected());
+		else if(e.getActionCommand().equals("Bold")) {	
+			newFont = textPreview.getFont().deriveFont((checkBold.isSelected()? Font.BOLD: 0) | (checkItalic.isSelected()? Font.ITALIC: 0));
+			textPreview.setFont(newFont);
 		}
 		else if(e.getActionCommand().equals("Italic")) {
-			newFont = preview.getFont().deriveFont((italic.isSelected()? Font.ITALIC: 0) | (bold.isSelected()? Font.BOLD: 0));
-			preview.setFont(newFont);
-			preview.repaint();
-			StyleConstants.setItalic(style, italic.isSelected());
+			newFont = textPreview.getFont().deriveFont((checkItalic.isSelected()? Font.ITALIC: 0) | (checkBold.isSelected()? Font.BOLD: 0));
+			textPreview.setFont(newFont);
 		}
+		saveAttributes();
 	}
-	
 	
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
-		
-		style = sc.getStyle(styleNames[list.getSelectedIndex()]);
+		index = list.getSelectedIndex();
 		updatePreview();
 		updateFontSettings();
 	}
 
-	
 	@Override
 	public void stateChanged(ChangeEvent e) {
-		
 		newColor = colorChooser.getSelectionModel().getSelectedColor();
-		colorPreview.repaint();
+		boxPreview.repaint();
 	}
-	
 	
 	private void updatePreview() {
-		
-		previewPanel.setBackground(sc.getBackground(style));
-		preview.setForeground(sc.getForeground(style));
-		newFont = sc.getFont(style);
-		preview.setFont(newFont);
-		previewPanel.repaint();
-		preview.repaint();	
+		Enumeration<?> keys = attributes[index].getAttributeNames();
+		String family = "";
+		boolean bold = false, italic = false;
+		while(keys.hasMoreElements()) {
+			String name = (String)keys.nextElement();
+			String value = (String)attributes[index].getAttribute(name);
+			if(name.endsWith("background")) previewPanel.setBackground(Color.decode(value));
+			else if(name.endsWith("foreground")) textPreview.setForeground(Color.decode(value));
+			else if(name.endsWith("family")) family = value;
+			else if(name.endsWith("bold")) bold = value.equals("true")? true: false;
+			else if(name.endsWith("italic")) italic = value.equals("true")? true: false;
+		}
+		newFont = new Font(family, (bold? Font.BOLD:0) | (italic? Font.ITALIC:0), 12);
+		textPreview.setFont(newFont);
 	}
-	
 	
 	private void updateFontSettings() {
-		
-		fontSize.setText(String.valueOf(newFont.getSize()));
 		fontChooser.setSelectedItem((String) newFont.getFontName());
-		bold.setSelected(newFont.isBold());
-		italic.setSelected(newFont.isItalic());
-		if(newFont.getFontName().toLowerCase().equals("bold")) bold.setEnabled(false);
-		if(newFont.getFontName().toLowerCase().equals("italic")) italic.setEnabled(false);
+		checkBold.setSelected(newFont.isBold());
+		checkItalic.setSelected(newFont.isItalic());
 	}
 	
-
 	void apply() {
 		
 		parent.updateAppearance(list.getSelectedValue());
 		saveAttributes();
 	}
 	
-	
 	void setDefault() {
 		
-		Style defStyle = (Style) style.getResolveParent();
-		StyleConstants.setBackground(style, sc.getBackground(defStyle));
-		StyleConstants.setForeground(style, sc.getForeground(defStyle));
-		StyleConstants.setFontFamily(style, StyleConstants.getFontFamily(defStyle));
-		StyleConstants.setFontSize(style, StyleConstants.getFontSize(defStyle));
-		StyleConstants.setBold(style, StyleConstants.isBold(defStyle));
-		StyleConstants.setItalic(style, StyleConstants.isItalic(defStyle));
 		updatePreview();
 		updateFontSettings();
 	}
 	
-	
 	private void saveAttributes() {
-		
-		try {
-			ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(new File(style.getName()+".set")));
-			StyleContext.writeAttributeSet(out, style);
-		} 
-		catch (IOException e) {
-			e.printStackTrace();
+		Enumeration<?> keys = attributes[index].getAttributeNames();
+		while(keys.hasMoreElements()) {
+			String name = (String)keys.nextElement();
+			if(name.endsWith("background")) attributes[index].addAttribute(name, colorToHex(previewPanel.getBackground()));
+			else if(name.endsWith("foreground")) attributes[index].addAttribute(name, colorToHex(textPreview.getForeground()));
+			else if(name.endsWith("family")) attributes[index].addAttribute(name, newFont.getFamily());
+			else if(name.endsWith("bold")) attributes[index].addAttribute(name, newFont.isBold()? "true": "false");
+			else if(name.endsWith("italic")) attributes[index].addAttribute(name, newFont.isItalic()? "true": "false");
 		}
 	}
 	
+	private void initAttributes() {
+		attributes = new SimpleAttributeSet[4];
+		for(int i=0; i<4; i++) attributes[i] = new SimpleAttributeSet();
+		String[] keys = AppProperties.KEYS;
+		for(int i=0; i<keys.length; i++) {
+			if(keys[i].startsWith("main")) attributes[0].addAttribute(keys[i], properties.getProperty(keys[i]));
+			else if(keys[i].startsWith("welcome")) attributes[1].addAttribute(keys[i], properties.getProperty(keys[i]));
+			else if(keys[i].startsWith("table")) attributes[2].addAttribute(keys[i], properties.getProperty(keys[i]));
+			else if(keys[i].startsWith("highlight")) attributes[3].addAttribute(keys[i], properties.getProperty(keys[i]));
+		}
+	}
 	
+	private String colorToHex(Color color) { 
+		String hex = Integer.toHexString(color.getRGB() & 0xffffff);
+	    while(hex.length() < 6) {
+	    	hex = "0" + hex;
+	    }
+	    return hex = "#" + hex;
+	}
 	
 	class ColorBox implements Icon {
 		int size;

@@ -46,7 +46,6 @@ public class TableMouseListener extends MouseAdapter {
 			new AddNewOrEditDialog(application, table, dataBase, row);
 		}
 		else if(e.getSource() instanceof JTableHeader) {
-			System.out.println(e.getSource());
 			int columnIndex = table.columnAtPoint(e.getPoint());
 			if(columnIndex == 0) return;
 			TableHeaderRenderer hr = (TableHeaderRenderer) table.getColumnModel().getColumn(columnIndex).getHeaderRenderer();
@@ -63,6 +62,10 @@ public class TableMouseListener extends MouseAdapter {
 			TableColumnModel model = table.getColumnModel();
 			for(int i=0; i<widths.length; i++) {
 				widths[i] = model.getColumn(i+1).getWidth();
+			}
+			String[] keys = AppProperties.KEYS;
+			for(int i=0; i<keys.length; i++) {
+				if(keys[i].equals(dataBase.getName().toLowerCase()+".column.sizes")) application.getProperties().putProperty(i, widths);
 			}
 			application.setColumnWidths(widths);
 		}

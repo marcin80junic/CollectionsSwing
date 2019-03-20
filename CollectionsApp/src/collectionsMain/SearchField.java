@@ -2,6 +2,7 @@ package collectionsMain;
 
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -37,6 +38,7 @@ public class SearchField extends JTextField implements FocusListener, KeyListene
 		this.icon = icon;
 		text = "Search For..";
 		insets = UIManager.getInsets("TextField.contentMargins");
+		setPreferredSize(new Dimension(150, 27));
 		addFocusListener(this);
 		addKeyListener(this);
 		addMouseListener(this);

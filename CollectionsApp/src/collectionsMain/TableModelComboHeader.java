@@ -140,7 +140,8 @@ class TableModelComboHeader extends AbstractTableModel implements TableModel, Ac
 		return (combo1Flag || combo2Flag || combo3Flag || combo4Flag || combo5Flag)? true: false;
 	}
 	
-	void resetModel() {
+	void resetModels() {
+		tableModel = tableModel.reloadTableModel();
 		resetComboFlags();
 		saveComboFlags();
 		updateComboLists();
@@ -149,7 +150,7 @@ class TableModelComboHeader extends AbstractTableModel implements TableModel, Ac
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	void updateComboLists() {
 		dataBase = application.getDataBase();
-		tableModel = (TableModelCollection<? extends Collectable<? extends AbstractItem>>) table.getModel();
+		tableModel = dataBase.getTableModel();
 		String[] comboHeaders = dataBase.getComboHeaders();
 		String[] combo1List = new String[tableModel.getRowCount()+1];
 		String[] combo2List = new String[tableModel.getRowCount()+1];
@@ -238,10 +239,10 @@ class TableModelComboHeader extends AbstractTableModel implements TableModel, Ac
 		updateComboFlags();
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void comboSelected(int comboNumber, String selection) {
-		tableModel = (TableModelCollection<? extends Collectable<? extends AbstractItem>>) table.getModel();
 		dataBase = application.getDataBase();
+		tableModel = dataBase.getTableModel();
+		
 		int size, size2 = 0;
 		int numOfVar = tableModel.getColumnCount()-1;
 		String element = "";
@@ -302,9 +303,7 @@ class TableModelComboHeader extends AbstractTableModel implements TableModel, Ac
 				}
 			}
 		}
-		application.columnsUpdate();
-		application.saveAction.setEnabled(false);
-		if(!application.areOtherCollectionsChanged(dataBase)) application.saveAllAction.setEnabled(false);
+		application.tableUpdate();
 	}
 	
 	private void comboUnselected() {
@@ -344,9 +343,9 @@ class TableModelComboHeader extends AbstractTableModel implements TableModel, Ac
 				}
 			}
 		}
-		application.columnsUpdate();
 		saveComboFlags();
 		updateComboLists();
+		application.tableUpdate();
 	}
 	
 	public static String[] removeDuplicates(String[] array) {
@@ -355,7 +354,7 @@ class TableModelComboHeader extends AbstractTableModel implements TableModel, Ac
 		uniqueListArray.sort(new Comparator<String>() {
 			public int compare(String s1, String s2) {
 				if (s1 != null && s2 != null) {
-					return s1.compareTo(s2);
+					return s1.compareToIgnoreCase(s2);
 				}
 				else return 1;
 			}

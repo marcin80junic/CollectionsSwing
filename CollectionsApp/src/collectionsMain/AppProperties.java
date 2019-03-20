@@ -50,14 +50,14 @@ public class AppProperties extends Properties {
 	
 	protected static final int PROPERTIES_COUNT = 28;
 	
-	protected final String[] KEYS = {"main.background", "main.foreground", "welcome.background", "welcome.foreground", "table.background",
+	protected static final String[] KEYS = {"main.background", "main.foreground", "welcome.background", "welcome.foreground", "table.background",
 			"table.foreground", "highlight.background", "highlight.foreground", "main.font.family", "main.font.bold", "main.font.italic", 
 			"welcome.font.family", "welcome.font.bold", "welcome.font.italic", "table.font.family", "table.font.bold", "table.font.italic",
-			"highlight.font.family", "highlight.font.bold", "highlight.font.italic", "books.column.sizes", "games.column.sizes",
-			"movies.column.sizes", "music.column.sizes", "books.file.path", "games.file.path", "movies.file.path", "music.file.path"};
+			"highlight.font.family", "highlight.font.bold", "highlight.font.italic", "book.column.sizes", "game.column.sizes",
+			"movie.column.sizes", "audiocd.column.sizes", "book.file.path", "game.file.path", "movie.file.path", "audiocd.file.path"};
 	
-	private File XML_FILE = new File("properties.xml");
-	private File DEF_XML_FILE = new File("defaults.xml");
+	private final File XML_FILE = new File("properties.xml");
+	private final File DEF_XML_FILE = new File("defaults.xml");
 	
 	
 	public AppProperties() {
@@ -100,7 +100,7 @@ public class AppProperties extends Properties {
 				if(j == BOOKS_COLUMN_SIZES) defColumns[i] = "200,212,190,120,70";
 				if(j == GAMES_COLUMN_SIZES) defColumns[i] = "225,200,140,157,70";
 				if(j == MOVIES_COLUMN_SIZES) defColumns[i] = "225,200,140,157,70";
-				if(j == MUSIC_COLUMN_SIZES) defColumns[i] = "225,252,200,45,70";
+				if(j == MUSIC_COLUMN_SIZES) defColumns[i] = "225,252,195,50,70";
 				defaults.put(KEYS[j], defColumns[i]);
 			}
 			String[] defPaths = new String[FILE_PATHS_COUNT];

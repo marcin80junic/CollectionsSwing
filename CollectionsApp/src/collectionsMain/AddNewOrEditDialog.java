@@ -215,8 +215,6 @@ public class AddNewOrEditDialog extends JDialog {
 		btnSave.addActionListener((ae) -> {
 			try {
 				((TableModelCollection<?>) table.getModel()).createItem(getData());
-				if(String.valueOf(table.getRowCount()-1).length() != String.valueOf(table.getRowCount()).length()) app.columnsUpdate();
-				app.tableUpdate();
 				setVisible(false);
 				Rectangle rowRectangle = table.getCellRect(table.getRowCount(), 0, true);
 				table.scrollRectToVisible(rowRectangle);
@@ -442,7 +440,6 @@ public class AddNewOrEditDialog extends JDialog {
 			try {
 				int row = table.convertRowIndexToModel(table.getSelectedRow());
 				((TableModelCollection<?>) table.getModel()).editItem(row, getData());
-				app.tableUpdate();
 				setVisible(false);
 			} catch (NumberFormatException nfe) { displayWarning(); }
 		});

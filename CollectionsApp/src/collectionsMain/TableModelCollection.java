@@ -21,17 +21,18 @@ public class TableModelCollection<T extends Collectable<? extends AbstractItem>>
 		this.columns = columns;
 		resetColumnSorters();
 		filtered = sorted = false;
+		fireTableDataChanged();
 	}
 	
 	public TableModelCollection<T> reloadTableModel() {
 		dataBase = new DataBase<T>(origin);
-		filtered = false;
+		filtered = sorted = false;
 		resetColumnSorters();
 		fireTableDataChanged();
 		return this;
 	}
 	
-	public TableModelCollection<T> updateTableModel() { return this; }
+	public TableModelCollection<T> updateTableModel() {	return this; }
 	
 	public void saveDataBase() {
 		origin = new DataBase<T>(dataBase);
@@ -46,7 +47,7 @@ public class TableModelCollection<T extends Collectable<? extends AbstractItem>>
 	
 	public boolean[] getAscending() { return ascending; }
 	public boolean[] getDescending() { return descending; }
-	public boolean isChanged() { return sorted && !filtered; }
+	public boolean isChanged() { return sorted || filtered; }
 	public boolean isFiltered() { return filtered; }
 	public void setFiltered(boolean filtered) { this.filtered = filtered; }
 	
@@ -71,7 +72,6 @@ public class TableModelCollection<T extends Collectable<? extends AbstractItem>>
 		T item = origin.create(data);
 		dataBase.add(item);
 		resetColumnSorters();
-		sorted = false;
 		fireTableRowsInserted(getRowCount()-1, getRowCount());
 	}
 	
@@ -98,13 +98,15 @@ public class TableModelCollection<T extends Collectable<? extends AbstractItem>>
 	public void moveItemUp(int index) {
 		dataBase.add(index-1, dataBase.remove(index));
 		resetColumnSorters();
-		sorted = false;
+		sorted = true;
+		fireTableRowsUpdated(index-1, index);
 	}
 	
 	public void moveItemDown(int index) {
 		dataBase.add(index+1, dataBase.remove(index));
 		resetColumnSorters();
-		sorted = false;
+		sorted = true;
+		fireTableRowsUpdated(index, index+1);
 	}
 	
 	public void sort(int columnIndex, boolean toggle) {
