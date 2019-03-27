@@ -1,4 +1,4 @@
-package collectionsMain;
+package collectionsMain.table;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -11,6 +11,8 @@ import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.border.BevelBorder;
 import javax.swing.table.TableCellRenderer;
+
+import collectionsMain.CollectionsApp;
 
 public class TableHeaderRenderer extends JPanel implements TableCellRenderer {
 

@@ -1,4 +1,4 @@
-package collectionsMain;
+package collectionsMain.table;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -16,11 +16,13 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
-import collectableItems.AbstractItem;
-import collectableItems.Collectable;
+import collectionsMain.CollectionsApp;
+import collectionsMain.DataBase;
+import collectionsMain.collectableItems.AbstractItem;
+import collectionsMain.collectableItems.Collectable;
 
 
-class TableModelComboHeader extends AbstractTableModel implements TableModel, ActionListener {
+public class TableModelComboHeader extends AbstractTableModel implements TableModel, ActionListener {
 	
 	private static final long serialVersionUID = 1L;
 	private CollectionsApp application;
@@ -132,7 +134,7 @@ class TableModelComboHeader extends AbstractTableModel implements TableModel, Ac
 		}
 	}
 
-	void resetComboFlags() {	
+	public void resetComboFlags() {	
 		combo1Flag = combo2Flag = combo3Flag = combo4Flag = combo5Flag = false;
 	}
 	
@@ -140,7 +142,7 @@ class TableModelComboHeader extends AbstractTableModel implements TableModel, Ac
 		return (combo1Flag || combo2Flag || combo3Flag || combo4Flag || combo5Flag)? true: false;
 	}
 	
-	void resetModels() {
+	public void resetModels() {
 		tableModel = tableModel.reloadTableModel();
 		resetComboFlags();
 		saveComboFlags();
@@ -148,7 +150,7 @@ class TableModelComboHeader extends AbstractTableModel implements TableModel, Ac
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	void updateComboLists() {
+	public void updateComboLists() {
 		dataBase = application.getDataBase();
 		tableModel = dataBase.getTableModel();
 		String[] comboHeaders = dataBase.getComboHeaders();

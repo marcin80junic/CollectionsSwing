@@ -1,4 +1,4 @@
-package collectableItems;
+package collectionsMain.collectableItems;
 
 import java.io.Serializable;
 

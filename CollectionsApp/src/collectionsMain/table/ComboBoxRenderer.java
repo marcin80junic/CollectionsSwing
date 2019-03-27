@@ -1,10 +1,12 @@
-package collectionsMain;
+package collectionsMain.table;
 
 import java.awt.Component;
 import java.awt.Font;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
+
+import collectionsMain.CollectionsApp;
 
 public class ComboBoxRenderer extends JLabel implements ListCellRenderer<Object> {
 	

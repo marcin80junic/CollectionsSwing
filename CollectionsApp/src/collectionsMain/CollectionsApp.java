@@ -54,13 +54,16 @@ import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
-
-import collectableItems.AbstractItem;
-import collectableItems.AudioCD;
-import collectableItems.Book;
-import collectableItems.Collectable;
-import collectableItems.Game;
-import collectableItems.Movie;
+import collectionsMain.collectableItems.AbstractItem;
+import collectionsMain.collectableItems.AudioCD;
+import collectionsMain.collectableItems.Book;
+import collectionsMain.collectableItems.Collectable;
+import collectionsMain.collectableItems.Game;
+import collectionsMain.collectableItems.Movie;
+import collectionsMain.fileDialog.CollectionsFileFilter;
+import collectionsMain.fileDialog.CollectionsThumbNailView;
+import collectionsMain.fileDialog.ImportAccessory;
+import collectionsMain.table.*;
 import mediaBooks.*;
 
 public class CollectionsApp extends JFrame implements ListSelectionListener  {
@@ -87,7 +90,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 	private JPopupMenu popupMenu;
 	private JToolBar mainToolBar, detailToolBar;
 	private JPanel welcomePane, homeBottom, shortcutPane, westPane, centralPane, btnPane, navigationPane, eastPane, searchPane, detailPanel,
-			detailItemPanel, toolbarPane, pane;
+			detailItemPanel, toolbarPane, toolPane, pane;
 	private boolean homeFlag, booksFlag, musicFlag, moviesFlag, gamesFlag;
 	private Border lowered, raised;
 	private CollectionsAction addAction, editAction, removeAction, upAction, downAction, clearAction, resetAction, findAction,
@@ -349,9 +352,10 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 			}
 			if((e.getType()==TableModelEvent.UPDATE) && tableModel.isFiltered()) tableUpdate();
 			if((e.getType()==TableModelEvent.INSERT) && tableModel.isFiltered()) comboHeaderModel.resetModels();
-			saveAction.setEnabled(!tableModel.isFiltered() && tableModel.isChanged());
+			saveAction.setEnabled(tableModel.isSaveable());
 			saveAllAction.setEnabled(areCollectionsChanged());
-			resetAction.setEnabled(tableModel.isChanged()); 
+			resetAction.setEnabled(tableModel.isChanged());
+			detailPaneUpdate((tableModel.getRowCount()==0)? true: table.getSelectionModel().isSelectionEmpty());
 		});
 		table.setColumnModel(dataBase.getTableColumnModel(table));
 		table.getActionMap().put("delete item", removeAction);
@@ -399,7 +403,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 		pane.add(tableScroll, BorderLayout.CENTER);
 	}	
 	
-	void tableUpdate() {
+	public void tableUpdate() {
 		if(tableModel.getRowCount()==0) comboHeaderModel.resetModels(); 
 		else {
 			comboHeaderModel.resetComboFlags();
@@ -424,6 +428,14 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 			btn.addMouseListener(new ButtonMouseListener(btn, mainBackground));
 			mainToolBar.add(btn).setPreferredSize(new Dimension(32, 32));
 		}
+		JButton b = new JButton("keys");
+		b.addActionListener((e) ->{
+			KeyStroke[] keys = table.getInputMap().allKeys();
+			for(KeyStroke k: keys) {
+				System.out.println(k.toString());
+			}
+		});
+		mainToolBar.add(b);
 	}	
 	
 	private void btnPaneInit() {
@@ -499,11 +511,10 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 		detailItemPanel.add(titleText, BorderLayout.PAGE_START);
 		detailPanel.add(detailTitle, BorderLayout.PAGE_START);
 		detailPanel.add(new JScrollPane(detailItemPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
-		JPanel toolPane = new JPanel();
+		toolPane = new JPanel();
 		toolPane.setLayout(new BorderLayout());
 		toolPane.setPreferredSize(new Dimension(200, 65));
 		detailToolBar = new JToolBar();
-		toolPane.add(detailToolBar);
 		eastPane.add(searchPane, BorderLayout.PAGE_START);
 		eastPane.add(detailPanel, BorderLayout.CENTER);
 		eastPane.add(toolPane, BorderLayout.PAGE_END);
@@ -513,18 +524,14 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 	private void detailPaneUpdate(boolean selectionEmpty) {
 		updateDetailPanelComponentsAppearance();
 		detailItemPanel.removeAll();
-		detailItemPanel.repaint();
-		if (homeFlag) {
-			detailTitle.setText("Welcome...");
-			return;
+		if(homeFlag) toolPane.removeAll();
+		else toolPane.add(detailToolBar);
+		detailTitle.setText(homeFlag? "Welcome...": dataBase.getName()+"s Collection");
+		if(!homeFlag && selectionEmpty) {
+			CollectionsTree tree = new CollectionsTree(tableModel);
+			detailItemPanel.add(tree);
 		}
-		else {
-			detailTitle.setText(dataBase.getName()+"s Collection");
-		}
-		if(selectionEmpty) {
-			
-		}
-		else {
+		else if(!selectionEmpty) {
 			if (booksFlag) {
 				Book book = (Book) tableModel.getItem(table.getSelectedRow());
 				BookStyledDocument bsd = new BookStyledDocument(book);
@@ -541,6 +548,8 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 				
 			}
 		}
+		detailItemPanel.repaint();
+		toolPane.repaint();
 	}
 	
 	private void updateDetailPanelComponentsAppearance() {
@@ -595,9 +604,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 		findAction = new CollectionsAction("Find...", null, searchIcon, "search", 'F', true);
 		findAction.putValue(Action.SHORT_DESCRIPTION, "Search for..");
 		upAction = new CollectionsAction("Move Up", upIcon, null, "up", KeyEvent.VK_UP, false);
-		upAction.putValue(Action.SHORT_DESCRIPTION, "Moves highlighted item up");
 		downAction = new CollectionsAction("Move Down", downIcon, null, "down", KeyEvent.VK_DOWN, false);
-		downAction.putValue(Action.SHORT_DESCRIPTION, "Moves highlighted item down");
 		importAction = new CollectionsAction("Import Collection", bigImport, smallImport, "import", 'I', true);
 		importAction.putValue(Action.SHORT_DESCRIPTION, "import collection from a file");
 		exportAction = new CollectionsAction("Export Collection", null, exportIcon, "export", 'O', false);
@@ -610,31 +617,24 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 	}
 	
 	private void actionsUpdate() {
-		
 		addAction.putValue(Action.NAME, "Add "+ dataBase.getName());
 		addAction.putValue(Action.SHORT_DESCRIPTION, "Adds new "+dataBase.getName());
+		addAction.setEnabled(!homeFlag);
 		editAction.putValue(Action.NAME, "Edit "+dataBase.getName());
 		editAction.putValue(Action.SHORT_DESCRIPTION, "Edits highlighted "+dataBase.getName());
+		editAction.setEnabled(!table.getSelectionModel().isSelectionEmpty());
 		removeAction.putValue(Action.NAME, "Remove "+dataBase.getName());
 		removeAction.putValue(Action.SHORT_DESCRIPTION, "Removes highlighted "+dataBase.getName());
+		removeAction.setEnabled(!table.getSelectionModel().isSelectionEmpty());
 		upAction.putValue(Action.SHORT_DESCRIPTION, "Moves highlighted "+dataBase.getName()+" up");
-		downAction.putValue(Action.SHORT_DESCRIPTION, "Moves highlighted "+dataBase.getName()+" down");
-		if(!homeFlag) {
-			exportAction.putValue(Action.SHORT_DESCRIPTION, "Export "+dataBase.getName()+" collection to a file");
-			exportAction.setEnabled(true);
-		} else {
-			exportAction.putValue(Action.SHORT_DESCRIPTION, "Export Collection to a file");
-			exportAction.setEnabled(false);
-		}
-		addAction.setEnabled(homeFlag? false: true);
-		editAction.setEnabled(table.getSelectionModel().isSelectionEmpty()? false: true);
-		removeAction.setEnabled(table.getSelectionModel().isSelectionEmpty()? false: true);
-		if(!tableModel.isChanged()) saveAction.setEnabled(false);
-		if(!areCollectionsChanged()) saveAllAction.setEnabled(false);
-		clearAction.setEnabled(table.getSelectionModel().isSelectionEmpty()? false: true);
 		upAction.setEnabled(false);
+		downAction.putValue(Action.SHORT_DESCRIPTION, "Moves highlighted "+dataBase.getName()+" down");
 		downAction.setEnabled(false);
-		saveAction.setEnabled(!tableModel.isFiltered() && tableModel.isChanged());
+		exportAction.putValue(Action.SHORT_DESCRIPTION, "Export "+(!homeFlag? dataBase.getName(): "")+" collection to a file");
+		exportAction.setEnabled(!homeFlag);
+		clearAction.setEnabled(table.getSelectionModel().isSelectionEmpty()? false: true);
+		resetAction.setEnabled(tableModel.isChanged()); 
+		saveAction.setEnabled(tableModel.isSaveable());
 		saveAllAction.setEnabled(areCollectionsChanged());
 	}
 	
@@ -661,7 +661,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 		detailPaneUpdate(lsm.isSelectionEmpty());		
 	}
 	
-	void searchFor() {
+	public void searchFor() {
 		search = tfSearch.getText().trim();
 		if(!search.equals("") && !homeFlag) {
 			tableModel.searchFor(search);
@@ -669,20 +669,20 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 		}
 	}
 	
-	DataBase<? extends Collectable<? extends AbstractItem>> getDataBase(){ return dataBase; }
-	AppProperties getProperties() { return properties; }
-	int[] getColumnWidths() { return columnWidths; }
-	void setColumnWidths(int[] widths) { columnWidths = widths; }
-	static String getSearchText() { return search;	}
-	static Color getMainBackground() { return mainBackground; }
-	static Color getMainForeground() { return mainForeground; }
-	static Font getMainFont() { return mainFont; }
-	static Color getTableBackground() { return tableBackground; }
-	static Color getTableForeground() { return tableForeground; }
-	static Font getTableFont() { return tableFont; }
-	static Color getHighlightBackground() { return highlightBackground; }
-	static Color getHighlightForeground() { return highlightForeground; }
-	static Font getHighlightFont() { return highlightFont; }
+	public DataBase<? extends Collectable<? extends AbstractItem>> getDataBase(){ return dataBase; }
+	public AppProperties getProperties() { return properties; }
+	public int[] getColumnWidths() { return columnWidths; }
+	public void setColumnWidths(int[] widths) { columnWidths = widths; }
+	public static String getSearchText() { return search;	}
+	public static Color getMainBackground() { return mainBackground; }
+	public static Color getMainForeground() { return mainForeground; }
+	public static Font getMainFont() { return mainFont; }
+	public static Color getTableBackground() { return tableBackground; }
+	public static Color getTableForeground() { return tableForeground; }
+	public static Font getTableFont() { return tableFont; }
+	public static Color getHighlightBackground() { return highlightBackground; }
+	public static Color getHighlightForeground() { return highlightForeground; }
+	public static Font getHighlightFont() { return highlightFont; }
 	
 	
 	private void resetBtnFlags() {
@@ -697,32 +697,32 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 	private boolean areCollectionsChanged() {
 		boolean books, audio, games, movies;
 		books = audio = games = movies = false;
-		if(booksCollection != null) books = booksCollection.getTableModel().isChanged();
-		if(musicCollection != null) audio = musicCollection.getTableModel().isChanged();
-		if(gamesCollection != null) games = gamesCollection.getTableModel().isChanged();
-		if(moviesCollection != null) movies = moviesCollection.getTableModel().isChanged();
+		if(booksCollection != null) books = booksCollection.getTableModel().isSaveable();
+		if(musicCollection != null) audio = musicCollection.getTableModel().isSaveable();
+		if(gamesCollection != null) games = gamesCollection.getTableModel().isSaveable();
+		if(moviesCollection != null) movies = moviesCollection.getTableModel().isSaveable();
 		return (books || audio || games || movies);
 	}
 	
 	private void saveAllCollections() {
 		if(booksCollection != null) {
-			if(booksCollection.getTableModel().isChanged()) {
-				booksCollection.saveToFile();
+			if(booksCollection.getTableModel().isSaveable()) {
+				booksCollection.getTableModel().saveDataBase();
 			}
 		}
 		if(musicCollection != null) {
-			if(musicCollection.getTableModel().isChanged()) {
-				musicCollection.saveToFile();
+			if(musicCollection.getTableModel().isSaveable()) {
+				musicCollection.getTableModel().saveDataBase();
 			}
 		}
 		if(gamesCollection != null) {
-			if(gamesCollection.getTableModel().isChanged()) {
-				gamesCollection.saveToFile();
+			if(gamesCollection.getTableModel().isSaveable()) {
+				gamesCollection.getTableModel().saveDataBase();
 			}
 		}
 		if(moviesCollection != null) {
-			if(moviesCollection.getTableModel().isChanged()) {
-				moviesCollection.saveToFile();
+			if(moviesCollection.getTableModel().isSaveable()) {
+				moviesCollection.getTableModel().saveDataBase();
 			}
 		}
 		saveAction.setEnabled(false);
@@ -819,7 +819,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 	@Override
 	protected void processWindowEvent(WindowEvent e) {
 		if(e.getID() == WindowEvent.WINDOW_CLOSING) {
-			if((saveAllAction.isEnabled() || areCollectionsChanged()) && (table.getRowCount() == dataBase.size())) {
+			if(saveAllAction.isEnabled()) {
 				int confirm = JOptionPane.showConfirmDialog(this, "There are unsaved changes in your collections \nDo you want to save them?",
 						"Unsaved Changes!", JOptionPane.YES_NO_CANCEL_OPTION);
 				if(confirm == JOptionPane.YES_OPTION) {
@@ -848,7 +848,6 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 	class CollectionsAction extends AbstractAction {
 
 		private static final long serialVersionUID = 1L;
-		private Rectangle rowRectangle;
 		
 		public CollectionsAction(String name, Icon bigIcon, Icon smallIcon, String actionCommand, int accelerator, boolean isEnabled) {
 			
@@ -895,38 +894,26 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 				if((row == 0)) return;
 				tableModel.moveItemUp(row);
 				table.setRowSelectionInterval(row-1, row-1);		
-				rowRectangle = table.getCellRect(row-1, 0, true);
+				Rectangle rowRectangle = table.getCellRect(row-1, 0, true);
 				table.scrollRectToVisible(rowRectangle);
-				if(dataBase.size() == table.getRowCount()) {
-					saveAction.setEnabled(true);
-					saveAllAction.setEnabled(true);
-				}
 			}
 			else if(ae.getActionCommand().equals("down")) {
 				int row = table.getSelectedRow();
 				if((row == table.getRowCount()-1)) return;
 				tableModel.moveItemDown(row);
 				table.setRowSelectionInterval(row+1, row+1);
-				rowRectangle = table.getCellRect(row+1, 0, true);
+				Rectangle rowRectangle = table.getCellRect(row+1, 0, true);
 				table.scrollRectToVisible(rowRectangle);
-				if(dataBase.size() == table.getRowCount()) {
-					saveAction.setEnabled(true);
-					saveAllAction.setEnabled(true);
-				}
 			}
 			else if(ae.getActionCommand().equals("clear")) {
 				clearSelection();
 			}
 			else if(ae.getActionCommand().equals("reset")) {
-				if(saveAction.isEnabled() || tableModel.isChanged() || comboHeaderModel.isComboSelected()) {
-					int confirm = JOptionPane.showConfirmDialog(CollectionsApp.this, "Resetting Collection will void all unsaved changes"
-							+ "\ndo you want to continue anyway?", "Confirm reset", JOptionPane.YES_NO_OPTION);
-					if(confirm == JOptionPane.NO_OPTION) return;
-					clearSelection();
-					comboHeaderModel.resetModels();
-					saveAction.setEnabled(false);
-					saveAllAction.setEnabled(areCollectionsChanged());
-				}
+				int confirm = JOptionPane.showConfirmDialog(CollectionsApp.this, "Resetting Collection will void all unsaved changes"
+						+ "\ndo you want to continue anyway?", "Confirm reset", JOptionPane.YES_NO_OPTION);
+				if(confirm == JOptionPane.NO_OPTION) return;
+				clearSelection();
+				comboHeaderModel.resetModels();
 			}
 			else if(ae.getActionCommand().equals("find")) {
 				searchFor();
@@ -947,7 +934,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 					table.getComponentPopupMenu().setVisible(false);
 				}
 				int row = table.getSelectedRow();
-				rowRectangle = table.getCellRect(row, 0, true);
+				Rectangle rowRectangle = table.getCellRect(row, 0, true);
 				int x = (int) (table.getWidth()/2.2);
 				int pointY = rowRectangle.y;
 				

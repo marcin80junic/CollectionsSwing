@@ -1,4 +1,4 @@
-package collectableItems;
+package collectionsMain.collectableItems;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,6 +73,12 @@ public class Game extends AbstractItem implements Comparable<Game> {
 				} else return author.compareTo(game.author);
 			} else return genre.compareTo(game.genre);
 		} else return title.compareTo(game.title);
+	}
+	
+	@Override
+	public int[] getHierachyOfData() { 
+		int[] nums = {4, 2, 1};
+		return nums;
 	}
 	
 }

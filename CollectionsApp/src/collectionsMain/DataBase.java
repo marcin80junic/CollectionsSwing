@@ -10,6 +10,7 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
@@ -17,8 +18,11 @@ import javax.swing.event.TableColumnModelEvent;
 import javax.swing.event.TableColumnModelListener;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
-import collectableItems.AbstractItem;
-import collectableItems.Collectable;
+
+import collectionsMain.collectableItems.AbstractItem;
+import collectionsMain.collectableItems.Collectable;
+import collectionsMain.table.TableHeaderRenderer;
+import collectionsMain.table.TableModelCollection;
 
 public class DataBase <T extends Collectable<? extends AbstractItem>> extends ArrayList<T> {
 	
@@ -63,11 +67,15 @@ public class DataBase <T extends Collectable<? extends AbstractItem>> extends Ar
 			Collection<T> list = (Collection<T>)ois.readObject();
 			addAll(list);
 		} catch (FileNotFoundException e) {	e.printStackTrace(); } 
-		  catch (IOException e) { e.printStackTrace(); } 
-		  catch (ClassNotFoundException e) { e.printStackTrace(); }
+		  catch (IOException | ClassNotFoundException e) {
+			  int yes = JOptionPane.showConfirmDialog(null, "This database file is corrupted!\nDo you want to remove it?",
+					  "Error loading file", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
+			  if(yes>0) file.delete();
+		  } 
+		
 	}
 	
-	void saveToFile() {
+	public void saveToFile() {
 		try(ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(dbFile))){
 			ArrayList<T> list = new ArrayList<>(this);
 			out.writeObject(list);

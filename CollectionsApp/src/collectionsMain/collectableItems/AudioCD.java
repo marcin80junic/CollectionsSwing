@@ -1,4 +1,4 @@
-package collectableItems;
+package collectionsMain.collectableItems;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -86,6 +86,12 @@ public class AudioCD extends AbstractItem implements Comparable<AudioCD> {
 			return -1;
 		}
 		return author.compareTo(cd.author);
+	}
+
+	@Override
+	public int[] getHierachyOfData() { 
+		int[] nums = {1, 2, 4};
+		return nums;
 	}
 
 }

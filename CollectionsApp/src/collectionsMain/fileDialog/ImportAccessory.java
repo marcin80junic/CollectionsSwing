@@ -1,4 +1,4 @@
-package collectionsMain;
+package collectionsMain.fileDialog;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -14,8 +14,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
-import collectableItems.AbstractItem;
-import collectableItems.Collectable;
+import collectionsMain.collectableItems.AbstractItem;
+import collectionsMain.collectableItems.Collectable;
 
 public class ImportAccessory extends JPanel implements PropertyChangeListener {
 

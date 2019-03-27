@@ -50,7 +50,7 @@ public class AppProperties extends Properties {
 	
 	protected static final int PROPERTIES_COUNT = 28;
 	
-	protected static final String[] KEYS = {"main.background", "main.foreground", "welcome.background", "welcome.foreground", "table.background",
+	public static final String[] KEYS = {"main.background", "main.foreground", "welcome.background", "welcome.foreground", "table.background",
 			"table.foreground", "highlight.background", "highlight.foreground", "main.font.family", "main.font.bold", "main.font.italic", 
 			"welcome.font.family", "welcome.font.bold", "welcome.font.italic", "table.font.family", "table.font.bold", "table.font.italic",
 			"highlight.font.family", "highlight.font.bold", "highlight.font.italic", "book.column.sizes", "game.column.sizes",

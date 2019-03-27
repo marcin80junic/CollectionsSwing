@@ -1,4 +1,4 @@
-package collectableItems;
+package collectionsMain.collectableItems;
 
 import java.net.URL;
 
@@ -28,6 +28,7 @@ public interface Collectable<T> {
 	String[] getGenres();
 	String[] getTableHeaders();
 	String[] getComboHeaders();
+	int[] getHierachyOfData();
 	String getIconPath();
 	String toString();
 	

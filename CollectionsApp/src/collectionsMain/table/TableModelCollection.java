@@ -1,10 +1,12 @@
-package collectionsMain;
+package collectionsMain.table;
 
 import java.util.Collections;
 import java.util.Comparator;
 import javax.swing.table.*;
-import collectableItems.AbstractItem;
-import collectableItems.Collectable;
+
+import collectionsMain.DataBase;
+import collectionsMain.collectableItems.AbstractItem;
+import collectionsMain.collectableItems.Collectable;
 
 public class TableModelCollection<T extends Collectable<? extends AbstractItem>> extends AbstractTableModel {
 
@@ -48,6 +50,7 @@ public class TableModelCollection<T extends Collectable<? extends AbstractItem>>
 	public boolean[] getAscending() { return ascending; }
 	public boolean[] getDescending() { return descending; }
 	public boolean isChanged() { return sorted || filtered; }
+	public boolean isSaveable() { return sorted && !filtered; }
 	public boolean isFiltered() { return filtered; }
 	public void setFiltered(boolean filtered) { this.filtered = filtered; }
 	

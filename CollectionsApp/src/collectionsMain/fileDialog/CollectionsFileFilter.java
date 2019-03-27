@@ -1,4 +1,4 @@
-package collectionsMain;
+package collectionsMain.fileDialog;
 
 import java.io.File;
 import javax.swing.filechooser.FileFilter;

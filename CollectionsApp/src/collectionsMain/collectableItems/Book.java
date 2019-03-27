@@ -1,4 +1,4 @@
-package collectableItems;
+package collectionsMain.collectableItems;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,6 +8,7 @@ public class Book extends AbstractItem implements Comparable<Book> {
 
 	private static final long serialVersionUID = 1L;
 	private String series;
+	
 	
 	public Book(String author, String title, String series, String genre, int year) {
 		super(author, title, genre, year);
@@ -81,6 +82,12 @@ public class Book extends AbstractItem implements Comparable<Book> {
 				else return -1;
 			} else return series.compareTo(book.series);
 		} else return author.compareTo(book.author);
+	}
+	
+	@Override
+	public int[] getHierachyOfData() { 
+		int[] nums = {1, 3, 2};
+		return nums;
 	}
 
 

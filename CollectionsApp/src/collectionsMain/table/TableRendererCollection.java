@@ -1,4 +1,4 @@
-package collectionsMain;
+package collectionsMain.table;
 
 import java.awt.Component;
 import javax.swing.JTable;
@@ -6,6 +6,8 @@ import javax.swing.JTextField;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
+
+import collectionsMain.CollectionsApp;
 
 public class TableRendererCollection extends JTextField implements TableCellRenderer {
 

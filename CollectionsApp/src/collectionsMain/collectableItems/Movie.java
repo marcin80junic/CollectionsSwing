@@ -1,4 +1,4 @@
-package collectableItems;
+package collectionsMain.collectableItems;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -78,4 +78,9 @@ public class Movie extends AbstractItem implements Comparable<Movie> {
 		} else return series.compareTo(movie.series);
 	}
 
+	@Override
+	public int[] getHierachyOfData() { 
+		int[] nums = {4, 2, 1};
+		return nums;
+	}
 }

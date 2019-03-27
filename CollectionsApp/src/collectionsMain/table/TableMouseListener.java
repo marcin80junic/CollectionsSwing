@@ -1,4 +1,4 @@
-package collectionsMain;
+package collectionsMain.table;
 
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
@@ -8,8 +8,12 @@ import javax.swing.JTable;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 
-import collectableItems.AbstractItem;
-import collectableItems.Collectable;
+import collectionsMain.AddNewOrEditDialog;
+import collectionsMain.AppProperties;
+import collectionsMain.CollectionsApp;
+import collectionsMain.DataBase;
+import collectionsMain.collectableItems.AbstractItem;
+import collectionsMain.collectableItems.Collectable;
 
 public class TableMouseListener extends MouseAdapter {
 	

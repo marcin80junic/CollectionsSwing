@@ -1,4 +1,4 @@
-package collectionsMain;
+package collectionsMain.fileDialog;
 
 import java.awt.Component;
 import java.awt.Graphics;
@@ -14,8 +14,8 @@ import javax.swing.ImageIcon;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.filechooser.FileView;
 
-import collectableItems.AbstractItem;
-import collectableItems.Collectable;
+import collectionsMain.collectableItems.AbstractItem;
+import collectionsMain.collectableItems.Collectable;
 
 public class CollectionsThumbNailView extends FileView {
 
