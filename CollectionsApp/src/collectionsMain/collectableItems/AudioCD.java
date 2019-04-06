@@ -10,6 +10,8 @@ public class AudioCD extends AbstractItem implements Comparable<AudioCD> {
 	private int[] albumCds;
 	
 	
+	public AudioCD() {   }
+	
 	public AudioCD (String artist, String albumName, String genre, int year, int[] albumCds) {
 		super(artist, albumName, genre, year);
 		this.albumCds = albumCds;

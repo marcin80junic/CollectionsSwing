@@ -29,19 +29,20 @@ public class BookStyledDocument extends DefaultStyledDocument {
 
 		author = new SimpleAttributeSet();
 		StyleConstants.setFontFamily(author, "serif");
-		StyleConstants.setFontSize(author, 20);
+		StyleConstants.setFontSize(author, 25);
 		StyleConstants.setBold(author, true);
 
 		series = new SimpleAttributeSet();
 		StyleConstants.setFontFamily(series, "serif");
 		StyleConstants.setFontSize(series, 25);
-		StyleConstants.setBold(series, true);
+		StyleConstants.setBold(series, false);
 		StyleConstants.setItalic(series, true);
 
 		title = new SimpleAttributeSet();
 		StyleConstants.setFontFamily(title, "serif");
-		StyleConstants.setFontSize(title, 30);
+		StyleConstants.setFontSize(title, 25);
 		StyleConstants.setBold(title, true);
+		StyleConstants.setItalic(title, true);
 
 		centered = new SimpleAttributeSet();
 		StyleConstants.setAlignment(centered, StyleConstants.ALIGN_CENTER);
@@ -58,8 +59,8 @@ public class BookStyledDocument extends DefaultStyledDocument {
 		String text = "";
 		try {
 			insertString(0, book.getAuthor()+"\n", author);
-			insertString(getLength(), book.getSeries()+"\n", series);
 			insertString(getLength(), book.getTitle()+"\n", title);
+			insertString(getLength(), book.getSeries()+"\n", series);
 			text = getText(0, getLength());
 		} catch (BadLocationException e) { e.printStackTrace(); }
 		

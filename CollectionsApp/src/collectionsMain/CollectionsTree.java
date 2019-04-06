@@ -156,7 +156,6 @@ public class CollectionsTree extends JTree {
 											tempNode = tempNode.getPreviousNode();
 											if(tempNode != null) {
 												tempName = tempNode.toString();
-												System.out.println("ancestor: "+anc+", next prev node: "+tempName);
 												if((anc != null) && anc.equals(tempName)) break;
 											}	
 										}

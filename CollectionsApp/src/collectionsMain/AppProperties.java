@@ -61,11 +61,11 @@ public class AppProperties extends Properties {
 	
 	
 	public AppProperties() {
-		super();this.
+		super();
 		loadDefaults();
 		if(XML_FILE.isFile()) {
 			try(FileInputStream fis = new FileInputStream(XML_FILE)){
-				super.loadFromXML(fis);
+				loadFromXML(fis);
 			} catch (IOException e) { e.printStackTrace(); }
 		}
 	}
@@ -90,7 +90,7 @@ public class AppProperties extends Properties {
 				int j = COLORS_COUNT+i;
 				if(j == MAIN_FONT_FAMILY || j== WELCOME_FONT_FAMILY || j == TABLE_FONT_FAMILY || j == HIGHLIGHT_FONT_FAMILY)
 					defFonts[i] = "serif";
-				if(j == WELCOME_FONT_BOLD || j == HIGHLIGHT_FONT_ITALIC || j == HIGHLIGHT_FONT_BOLD) defFonts[i] = "true";
+				else if(j == WELCOME_FONT_BOLD || j == HIGHLIGHT_FONT_ITALIC || j == HIGHLIGHT_FONT_BOLD) defFonts[i] = "true";
 				else defFonts[i] = "false";
 				defaults.put(KEYS[j], defFonts[i]);
 			}
@@ -119,11 +119,18 @@ public class AppProperties extends Properties {
 		this.defaults = defaults;
 	}
 	
-	private void saveProperties() {
+	public void saveProperties() {
 		try(FileOutputStream out = new FileOutputStream(XML_FILE)){
 			storeToXML(out, "properties");
 		} catch (IOException e) { e.printStackTrace(); }
 	}
+	
+	/*@Override
+	public Object put(Object key, Object value) {
+		super.put(key, value);
+		saveProperties();
+		return null;
+	}*/
 	
 	public void putProperty(int key, String value) {
 		if( key > (PROPERTIES_COUNT-1) || key < 0) throw new IllegalArgumentException("property is invalid");

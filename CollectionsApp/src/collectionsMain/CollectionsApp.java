@@ -7,11 +7,13 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -30,6 +32,7 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -45,6 +48,7 @@ import javax.swing.JViewport;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SpringLayout;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
@@ -79,6 +83,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 	private static Color mainBackground, mainForeground, welcomeBackground, welcomeForeground, tableBackground, tableForeground, 
 		  	highlightBackground, highlightForeground;
 	private static Font mainFont, welcomeFont, tableFont, highlightFont;
+	private JInternalFrame colorChooser;
 	private JDialog settings;
 	private JButton btnHome, btnBooks, btnMusic, btnMovies, btnGames;
 	private JButton[] navigationButtons;
@@ -89,7 +94,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 	private int[] columnWidths;
 	private JPopupMenu popupMenu;
 	private JToolBar mainToolBar, detailToolBar;
-	private JPanel welcomePane, homeBottom, shortcutPane, westPane, centralPane, btnPane, navigationPane, eastPane, searchPane, detailPanel,
+	private JPanel welcomePane, shortcutPane, westPane, centralPane, btnPane, navigationPane, eastPane, searchPane, detailPanel,
 			detailItemPanel, toolbarPane, toolPane, pane;
 	private boolean homeFlag, booksFlag, musicFlag, moviesFlag, gamesFlag;
 	private Border lowered, raised;
@@ -104,8 +109,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 	
 	CollectionsApp() {
 		super ("Collections");
-		setMinimumSize(new Dimension(940, 300));
-		setPreferredSize(new Dimension(940, 500));
+		setPreferredSize(new Dimension(958, 500));
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 	
 		homeFlag = true;
@@ -115,35 +119,34 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 		actionsInit();
 		
 		westPaneInit();
-		GridBagConstraints wp = new GridBagConstraints();
-		wp.gridx = 0;
-		wp.weighty = 1.0;
-		wp.fill = GridBagConstraints.VERTICAL;
 		centralPaneInit();
-		GridBagConstraints cp = new GridBagConstraints();
-		cp.gridx = 1;
-		cp.weighty = 1.0;
-		cp.fill = GridBagConstraints.BOTH;
 		navigationPaneInit();
-		GridBagConstraints np = new GridBagConstraints();
-		np.gridx = 2;
-		np.weighty = 1.0;
-		np.fill = GridBagConstraints.BOTH;
 		eastPaneInit();
-		GridBagConstraints ep = new GridBagConstraints();
-		ep.gridx = 3;
-		ep.weighty = 1.0;
-		ep.weightx = 1.0;
-		ep.fill = GridBagConstraints.BOTH;
-
 		setJMenuBar(createMenuBar());
-		JPanel contentPane = (JPanel) getContentPane();
-		contentPane.setLayout(new GridBagLayout());
-		contentPane.add(westPane, wp);
-		contentPane.add(centralPane, cp);
-		contentPane.add(navigationPane, np);
-		contentPane.add(eastPane, ep);
-		setContentPane(new JScrollPane(contentPane));
+		SpringLayout layout = new SpringLayout();
+		layout.putConstraint(SpringLayout.WEST, westPane, 5, SpringLayout.WEST, getContentPane());
+		layout.putConstraint(SpringLayout.NORTH, westPane, 5, SpringLayout.NORTH, getContentPane());
+		layout.putConstraint(SpringLayout.SOUTH, westPane, 5, SpringLayout.SOUTH, getContentPane());
+		
+		layout.putConstraint(SpringLayout.WEST, centralPane, 5, SpringLayout.EAST, westPane);
+		layout.putConstraint(SpringLayout.NORTH, centralPane, 5, SpringLayout.NORTH, getContentPane());
+		layout.putConstraint(SpringLayout.SOUTH, centralPane, 5, SpringLayout.SOUTH, getContentPane());
+		
+		layout.putConstraint(SpringLayout.WEST, navigationPane, 0, SpringLayout.EAST, centralPane);
+		layout.putConstraint(SpringLayout.NORTH, navigationPane, 5, SpringLayout.NORTH, getContentPane());
+		layout.putConstraint(SpringLayout.SOUTH, navigationPane, 5, SpringLayout.SOUTH, getContentPane());
+		
+		layout.putConstraint(SpringLayout.WEST, eastPane, 0, SpringLayout.EAST, navigationPane);
+		layout.putConstraint(SpringLayout.NORTH, eastPane, 9, SpringLayout.NORTH, getContentPane());
+		layout.putConstraint(SpringLayout.SOUTH, eastPane, 5, SpringLayout.SOUTH, getContentPane());
+		layout.putConstraint(SpringLayout.EAST, eastPane, 5, SpringLayout.EAST, getContentPane());
+		
+		getContentPane().setLayout(layout);
+		getContentPane().setBackground(mainBackground);
+		getContentPane().add(westPane);
+		getContentPane().add(centralPane);
+		getContentPane().add(navigationPane);
+		getContentPane().add(eastPane);
 		pack();
 		setLocationRelativeTo(null);
 		setVisible(true);
@@ -234,10 +237,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 	private void westPaneInit() {
 		
 		westPane = new JPanel();
-		westPane.setBorder(BorderFactory.createEmptyBorder(5, 5, 0,	5));
 		westPane.setLayout(new BoxLayout(westPane, BoxLayout.Y_AXIS));
-		westPane.setMinimumSize(new Dimension(65, 300));
-		westPane.setPreferredSize(new Dimension(65, 300));	
 		Dimension maxBtn = new Dimension(65, 60);
 		lowered = BorderFactory.createBevelBorder(BevelBorder.LOWERED);
 		raised = BorderFactory.createBevelBorder(BevelBorder.RAISED);
@@ -274,10 +274,8 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 	private void centralPaneInit() {
 		
 		centralPane = new JPanel();
-		centralPane.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
 		centralPane.setLayout(new BorderLayout());
-		centralPane.setMinimumSize(new Dimension(805, 500));
-		centralPane.setPreferredSize(new Dimension(805, 500));
+		centralPane.setPreferredSize(new Dimension(825, 500));
 		welcomePaneInit();
 		toolbarPaneInit();
 		btnPaneInit();
@@ -300,12 +298,12 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 		titleLine2.setForeground(welcomeForeground);	
 		titleLine1.setAlignmentX(0.5f);
 		titleLine2.setAlignmentX(0.5f);
-		titlePane.add(Box.createVerticalStrut(30));
+		titlePane.add(Box.createVerticalStrut(20));
 		titlePane.add(titleLine1);
-		titlePane.add(Box.createVerticalStrut(10));
+		titlePane.add(Box.createVerticalStrut(5));
 		titlePane.add(titleLine2);
 		shortcutPane = new JPanel();
-		shortcutPane.setBorder(BorderFactory.createEmptyBorder(30, 10, 10, 10));
+		shortcutPane.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
 		shortcutPane.setOpaque(false);	
 		CollectionsAction[] actions = {importAction, booksAction, audioAction, gamesAction, moviesAction, settingsAction};
 		for(int i=0; i<actions.length; i++) {
@@ -318,11 +316,8 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 			btn.addMouseListener(new ButtonMouseListener(btn, welcomeBackground));
 			shortcutPane.add(btn).setPreferredSize(new Dimension(150, 90));
 		}
-		homeBottom = new JPanel();
-		homeBottom.setPreferredSize(new Dimension(680, 66));
 		welcomePane.add(shortcutPane, BorderLayout.CENTER);
 		welcomePane.add(titlePane, BorderLayout.PAGE_START);
-		welcomePane.add(homeBottom, BorderLayout.PAGE_END);
 	}
 	
 	private void centralPaneUpdate() {
@@ -330,6 +325,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 		centralPane.removeAll();
 		if(homeFlag) {
 			centralPane.add(welcomePane);
+			centralPane.add(btnPane, BorderLayout.PAGE_END);
 		}
 		else {
 			centralPane.add(toolbarPane, BorderLayout.PAGE_START);
@@ -361,9 +357,15 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 		table.getActionMap().put("delete item", removeAction);
 		table.getActionMap().put("edit item", editAction);
 		table.getActionMap().put("display popupMenu", displayPopupMenuAction);
+		table.getActionMap().put("add item", addAction);
+		table.getActionMap().put("move up", upAction);
+		table.getActionMap().put("move down", downAction);
 		table.getInputMap().put(KeyStroke.getKeyStroke("DELETE"), "delete item");
 		table.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "edit item");
 		table.getInputMap().put(KeyStroke.getKeyStroke("SPACE"), "display popupMenu");
+		table.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.CTRL_DOWN_MASK), "add item");
+		table.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, InputEvent.CTRL_DOWN_MASK), "move up");
+		table.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, InputEvent.CTRL_DOWN_MASK), "move down");
 		tablePopupMenuInit();
 		table.setComponentPopupMenu(popupMenu);
 		if(tableMouseListener != null) table.removeMouseListener(tableMouseListener);
@@ -414,7 +416,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 	private void toolbarPaneInit() {
 		toolbarPane = new JPanel();
 		toolbarPane.setLayout(new BorderLayout());
-		toolbarPane.setPreferredSize(new Dimension(805, 35));
+		toolbarPane.setPreferredSize(new Dimension(825, 35));
 		mainToolBar = new JToolBar();
 		mainToolBar.setBorderPainted(false);
 		mainToolBar.setFloatable(false);
@@ -430,38 +432,50 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 		}
 		JButton b = new JButton("keys");
 		b.addActionListener((e) ->{
-			KeyStroke[] keys = table.getInputMap().allKeys();
-			for(KeyStroke k: keys) {
-				System.out.println(k.toString());
-			}
+			if(colorChooser == null) {
+				colorChooser = new JInternalFrame();
+				colorChooser.setContentPane(new MiniColorChooser());
+				Point p = new Point(CollectionsApp.this.getBounds().x + b.getBounds().x, CollectionsApp.this.getBounds().y + b.getBounds().y);
+				colorChooser.setBounds(p.x, p.y-20, 0, 0);
+				colorChooser.pack();
+				colorChooser.setVisible(true);
+				colorChooser.addFocusListener(new FocusAdapter() {
+					@Override
+					public void focusLost(FocusEvent fe) {
+						colorChooser.setVisible(false);
+					}
+				});
+			} else colorChooser.setVisible(true);
 		});
 		mainToolBar.add(b);
 	}	
 	
 	private void btnPaneInit() {
-		
 		btnPane = new JPanel();
 		btnPane.setOpaque(false);
+		btnPane.setPreferredSize(new Dimension(200, 65));
 		btnPane.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 20));
-		btnPane.setPreferredSize(new Dimension(680, 66));
-		Dimension btnDim = new Dimension(135, 26);
-		CollectionsAction[] actions = {addAction, editAction, removeAction, clearAction, resetAction};
-		for(int i=0; i<actions.length; i++) {
-			JButton btn = new JButton(actions[i]);
-			btn.setForeground(mainForeground);
-			btn.setFont(mainFont.deriveFont(12f));
-			btn.addMouseListener(new ButtonMouseListener(btn, mainBackground));
-			btnPane.add(btn).setPreferredSize(btnDim);
+	}
+	
+	private void btnPaneUpdate() {
+		btnPane.removeAll();
+		if(!homeFlag) {
+			Dimension btnDim = new Dimension(135, 26);
+			CollectionsAction[] actions = {addAction, editAction, removeAction, clearAction, resetAction};
+			for(int i=0; i<actions.length; i++) {
+				JButton btn = new JButton(actions[i]);
+				btn.setForeground(mainForeground);
+				btn.setFont(mainFont.deriveFont(12f));
+				btn.addMouseListener(new ButtonMouseListener(btn, mainBackground));
+				btnPane.add(btn).setPreferredSize(btnDim);
+			}
 		}
 	}
 	
 	private void navigationPaneInit() {
-		
 		navigationPane = new JPanel();
 		navigationPane.setLayout(new BoxLayout(navigationPane, BoxLayout.PAGE_AXIS));
-		navigationPane.setMinimumSize(new Dimension(48, 500));
 		navigationPane.setPreferredSize(new Dimension(48, 500));
-		navigationPane.setMaximumSize(new Dimension(48, 500));
 		navigationButtons = new JButton[] {new JButton(upAction), new JButton(downAction)};
 		for(int i=0; i<navigationButtons.length; i++) {
 			navigationButtons[i].setHideActionText(true);
@@ -470,7 +484,6 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 	}
 	
 	private void navigationPaneUpdate() {
-		
 		navigationPane.removeAll();
 		if(!homeFlag) {
 			navigationPane.add(Box.createVerticalGlue());
@@ -487,17 +500,19 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 	private void eastPaneInit() {
 		eastPane = new JPanel();
 		eastPane.setLayout(new BorderLayout());
-		eastPane.setPreferredSize(new Dimension(300, -1));
 		searchPane = new JPanel();
-		searchPane.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
+		searchPane.setLayout(new BoxLayout(searchPane, BoxLayout.LINE_AXIS));
+		searchPane.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
 		searchPane.setOpaque(false);
 		lblSearch = new JLabel("Search for: ");
 		lblSearch.setFont(mainFont);
 		lblSearch.setLabelFor(tfSearch);
 		lblSearch.setDisplayedMnemonic('h');
-		tfSearch = new SearchField(this, (Icon)findAction.getValue(Action.SMALL_ICON));
+		tfSearch = new SearchField(this, (Icon)findAction.getValue(Action.SMALL_ICON), "Search for...");
+		searchPane.add(Box.createHorizontalGlue());
 		searchPane.add(lblSearch).setForeground(mainForeground);
-		searchPane.add(tfSearch);		
+		searchPane.add(tfSearch);	
+		searchPane.add(Box.createHorizontalGlue());
 		detailPanel = new JPanel(new BorderLayout());
 		detailPanel.setBorder(raised);
 		detailPanel.setBackground(welcomeBackground);
@@ -508,6 +523,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 		detailItemPanel.setBackground(welcomeBackground);
 		titleText = new JTextPane();
 		titleText.setEditable(false);
+		titleText.setPreferredSize(new Dimension(200, 200));
 		detailItemPanel.add(titleText, BorderLayout.PAGE_START);
 		detailPanel.add(detailTitle, BorderLayout.PAGE_START);
 		detailPanel.add(new JScrollPane(detailItemPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
@@ -518,6 +534,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 		eastPane.add(searchPane, BorderLayout.PAGE_START);
 		eastPane.add(detailPanel, BorderLayout.CENTER);
 		eastPane.add(toolPane, BorderLayout.PAGE_END);
+		eastPane.add(new JPanel(), BorderLayout.LINE_END);
 		detailPaneUpdate(true);
 	}
 	
@@ -591,15 +608,15 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 		gamesAction = new CollectionsAction("Games Collection", gamesIcon, null, "games", 'G', true);
 		moviesAction = new CollectionsAction("Movies Collection", moviesIcon, null, "movies", 'V', true);
 		addAction = new CollectionsAction("Add", null, null, "add", 'A', false);
-		editAction = new CollectionsAction("Edit", null, null, "edit", 'E', false);
-		removeAction = new CollectionsAction("Remove", null, null, "remove", 'R', false);
+		editAction = new CollectionsAction("Edit", null, null, "edit", KeyEvent.VK_ENTER, false);
+		removeAction = new CollectionsAction("Remove", null, null, "remove", KeyEvent.VK_DELETE, false);
 		saveAction = new CollectionsAction("Save", null, saveIcon, "save", 'S', false);
 		saveAction.putValue(Action.SHORT_DESCRIPTION, "Saves changes in current collection");
 		saveAllAction = new CollectionsAction("Save All", null, saveAllIcon, "saveAll", 'L', false);
 		saveAllAction.putValue(Action.SHORT_DESCRIPTION, "Saves changes in all collections");
 		clearAction = new CollectionsAction("Clear Selection", null, null, "clear", 'C', false);
 		clearAction.putValue(Action.SHORT_DESCRIPTION, "Clears current selection");
-		resetAction = new CollectionsAction("Reset", null, null, "reset", 'T', false);
+		resetAction = new CollectionsAction("Reset", null, null, "reset", 'R', false);
 		resetAction.putValue(Action.SHORT_DESCRIPTION, "Resets current collection");
 		findAction = new CollectionsAction("Find...", null, searchIcon, "search", 'F', true);
 		findAction.putValue(Action.SHORT_DESCRIPTION, "Search for..");
@@ -607,7 +624,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 		downAction = new CollectionsAction("Move Down", downIcon, null, "down", KeyEvent.VK_DOWN, false);
 		importAction = new CollectionsAction("Import Collection", bigImport, smallImport, "import", 'I', true);
 		importAction.putValue(Action.SHORT_DESCRIPTION, "import collection from a file");
-		exportAction = new CollectionsAction("Export Collection", null, exportIcon, "export", 'O', false);
+		exportAction = new CollectionsAction("Export Collection", null, exportIcon, "export", 'E', false);
 		exportAction.putValue(Action.SHORT_DESCRIPTION, "Export Collection to a file");
 		settingsAction = new CollectionsAction("Settings", bigSettings, smallSettings, "settings", 'N', true);
 		settingsAction.putValue(Action.SHORT_DESCRIPTION, "Change application's settings");
@@ -645,6 +662,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 			actionsUpdate();
 		}
 		westPaneUpdate();
+		btnPaneUpdate();
 		centralPaneUpdate();
 		navigationPaneUpdate();
 		detailPaneUpdate(table.getSelectionModel().isSelectionEmpty());
@@ -747,17 +765,17 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 	}
 	
 	void updateAppearance(String element) {	
-		propertiesInit();	
+		propertiesInit();
 		if(element.equals("Application's Frame")) {
+			lookAndFeelInit();
 			SwingUtilities.updateComponentTreeUI(this);
 			SwingUtilities.updateComponentTreeUI(settings);
-			lookAndFeelInit();
+			getContentPane().setBackground(mainBackground);
 			updateButtonListeners(westPane.getComponents(), mainBackground, null, null);
 			updateButtonListeners(btnPane.getComponents(), mainBackground, mainForeground, mainFont.deriveFont(12f));
 			updateButtonListeners(navigationButtons, mainBackground, null, null);
 			lblSearch.setFont(mainFont);
 			lblSearch.setForeground(mainForeground);
-			tableInit();
 			if(!homeFlag) tableInit();
 			centralPaneUpdate();
 			titleLine1.setFont(welcomeFont);
@@ -776,10 +794,12 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 			updateButtonListeners(shortcutPane.getComponents(), welcomeBackground, welcomeForeground, welcomeFont.deriveFont(12f));
 		}
 		else if(element.equals("Table")) {
-			table.setBackground(tableBackground);
-			table.repaint();
-			comboHeaderTable.setBackground(tableBackground);
-			comboHeaderTable.repaint();
+			if(!homeFlag) {
+				table.setBackground(tableBackground);
+				table.repaint();
+				comboHeaderTable.setBackground(tableBackground);
+				comboHeaderTable.repaint();
+			}
 		}
 		else if(element.equals("Highlight Style")) {
 			
@@ -802,7 +822,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 	private void displayExportDialog() {
 		JFileChooser export = new JFileChooser();
 		export.setDialogTitle("Export your "+dataBase.getName()+" Collection");
-		export.setCurrentDirectory(new File("/users/marcin/eclipse-workspace/collectionsapp/"));
+		export.setCurrentDirectory(new File("."));
 		export.setSelectedFile(new File(dataBase.getFilePath()));
 		export.setFileView(new CollectionsThumbNailView(this));
 		export.setFileFilter(new CollectionsFileFilter("Collection files *.dat", "dat"));
@@ -989,7 +1009,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 				btnBooks.setBackground(btnBooks.getBackground().darker());
 				if(booksCollection == null) {
 					booksCollection = new DataBase<Book>(booksFilePath);
-					booksCollection.instantiateType(new Book("a","a","a","a",0));
+					booksCollection.instantiateType("collectionsMain.collectableItems.Book");
 				}
 				dataBase = booksCollection;
 				resetBtnFlags();
@@ -1002,7 +1022,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 				btnMusic.setBackground(btnMusic.getBackground().darker());
 				if(musicCollection == null) {
 					musicCollection = new DataBase<AudioCD>(musicFilePath);
-					musicCollection.instantiateType(new AudioCD("","","",0,new int[0]));
+					musicCollection.instantiateType("collectionsMain.collectableItems.AudioCD");
 				}
 				dataBase = musicCollection;
 				resetBtnFlags();
@@ -1015,7 +1035,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 				btnMovies.setBackground(btnMovies.getBackground().darker());
 				if(moviesCollection == null) {
 					moviesCollection = new DataBase<Movie>(moviesFilePath);
-					moviesCollection.instantiateType(new Movie("","","","",0));
+					moviesCollection.instantiateType("collectionsMain.collectableItems.Movie");
 				}
 				dataBase = moviesCollection;
 				resetBtnFlags();
@@ -1028,7 +1048,7 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 				btnGames.setBackground(btnGames.getBackground().darker());
 				if(gamesCollection == null) {
 					gamesCollection = new DataBase<Game>(gamesFilePath);
-					gamesCollection.instantiateType(new Game("","","","",0));
+					gamesCollection.instantiateType("collectionsMain.collectableItems.Game");
 				}
 				dataBase = gamesCollection;
 				resetBtnFlags();
@@ -1055,13 +1075,14 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 				buttonPanel.add(def).setPreferredSize(btnDim);
 				
 				JTabbedPane tabs = new JTabbedPane();
-				Appearance chooser = new Appearance(CollectionsApp.this, properties);
+				Appearance chooser = new Appearance(CollectionsApp.this, properties, apply, def);
 				tabs.add("Appearance", chooser);
 				
 				ok.addActionListener((e) -> settings.setVisible(false));
 				cancel.addActionListener((e) -> settings.setVisible(false));
 				apply.addActionListener((e) -> {
 					if(tabs.getSelectedComponent().equals(chooser)) chooser.apply();
+					apply.setEnabled(false);
 				});
 				def.addActionListener((e) -> {
 					if(tabs.getSelectedComponent().equals(chooser)) chooser.setDefault();

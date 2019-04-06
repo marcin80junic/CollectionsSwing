@@ -10,6 +10,8 @@ public class Movie extends AbstractItem implements Comparable<Movie> {
 	private String series;
 	
 	
+	public Movie() {   }
+	
 	public Movie(String title, String series, String genre, String studio, int year) {
 		super(studio, title, genre, year);
 		this.series = series;

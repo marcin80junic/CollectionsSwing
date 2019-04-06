@@ -29,15 +29,13 @@ public class SearchField extends JTextField implements FocusListener, KeyListene
 	private String text;
 	private CollectionsApp app;
 	private Icon icon;
-	private Insets insets;
 
 
-	public SearchField(CollectionsApp app, Icon icon) {
+	public SearchField(CollectionsApp app, Icon icon, String textDisplayed) {
 		super ();
 		this.app = app;
 		this.icon = icon;
-		text = "Search For..";
-		insets = UIManager.getInsets("TextField.contentMargins");
+		text = textDisplayed;
 		setPreferredSize(new Dimension(150, 27));
 		addFocusListener(this);
 		addKeyListener(this);
@@ -48,14 +46,16 @@ public class SearchField extends JTextField implements FocusListener, KeyListene
 	public void setIcon(Icon icon) { this.icon = icon; }
  
     public Icon getIcon() { return icon; }
-	
+    
+    public Dimension getMaximumSize() { return new Dimension(150,30); }
+    
 	public String getTextWhenNotFocused() { return text; }
  
     public void setTextWhenNotFocused(String newText) { text = newText; }
     
     public Rectangle getIconRectangle() {
-    	int x = getWidth() - insets.right - icon.getIconWidth() - 3;
-    	int y = insets.top;
+    	int x = getWidth() - 3 - icon.getIconWidth() - 3;
+    	int y = getInsets().top;
     	Rectangle rect = new Rectangle(x, y, icon.getIconWidth()+3, icon.getIconHeight());
     	return rect;
     }
@@ -65,17 +65,17 @@ public class SearchField extends JTextField implements FocusListener, KeyListene
        
     	super.paintComponent(g);
     	
-    	int textX = 2;
+    	int textX = 4;
     	 
         if(icon != null){
             int iconWidth = icon.getIconWidth();
             int iconHeight = icon.getIconHeight();
-            int x = this.getWidth() - insets.right - iconWidth;//this is our icon's x
-            int y = (this.getHeight() - iconHeight)/2;
-            textX = iconWidth + 2; //this is the x where text should end 
+            int x = getWidth() - 3 - iconWidth;//this is our icon's x
+            int y = (getHeight() - iconHeight)/2;
+            textX = iconWidth + textX; //this is the x where text should end 
             icon.paintIcon(this, g, x, y);
         }
-        setMargin(new Insets(0, 0, 0, textX));
+        setMargin(new Insets(0, 3, 0, textX));
         
         if (!this.hasFocus() && this.getText().equals("")) {
             int height = this.getHeight();
@@ -86,7 +86,7 @@ public class SearchField extends JTextField implements FocusListener, KeyListene
             g.setColor(UIManager.getColor("textInactiveText"));
             int h = g.getFontMetrics().getHeight();
             int textBottom = (height - h) / 2 + h - 3;
-            int x = this.getInsets().left;
+            int x = getInsets().left;
             Graphics2D g2d = (Graphics2D) g;
             RenderingHints hints = g2d.getRenderingHints();
             g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);

@@ -14,7 +14,6 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Enumeration;
-
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.Icon;
@@ -26,6 +25,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.colorchooser.AbstractColorChooserPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
@@ -41,29 +41,40 @@ public class Appearance extends JPanel implements ChangeListener, ActionListener
 	private JList<String> list;
 	private JColorChooser colorChooser;
 	private JLabel textPreview, boxPreview;
-	private JButton btnBackground, btnForeground;
+	private JButton btnBackground, btnForeground, btnApply, btnDefault;
 	private JCheckBox checkBold, checkItalic;
 	private JComboBox<String> fontChooser;
 	private Color newColor;
 	private Font newFont;
-	private SimpleAttributeSet[] attributes;
+	private SimpleAttributeSet[] defaultAttributes, initAttributes, currentAttributes;
 	private int index;
 	
 	
-	public Appearance(CollectionsApp app, AppProperties props) {
+	public Appearance(CollectionsApp app, AppProperties props, JButton apply, JButton def) {
 		parent = app;
 		properties = props;
+		btnApply = apply;
+		btnDefault = def;
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		initAttributes();
 		add(colorChooserInit());
 		add(fontPanelInit());
+		btnApply.setEnabled(!initAttributes[index].equals(currentAttributes[index]));
+		btnDefault.setEnabled(!currentAttributes[index].equals(defaultAttributes[index]));
+	}
+	
+	private void updateAppearance() {
+		AbstractColorChooserPanel[] panes = colorChooser.getChooserPanels();
+		for(int i=0; i<panes.length; i++) {
+			if(i!=0) colorChooser.removeChooserPanel(panes[i]);
+		}
 	}
 	
 	private JPanel colorChooserInit() {
-		
 		JPanel colorPane = new JPanel();
 		colorPane.setLayout(new BorderLayout());
 		colorChooser = new JColorChooser();
+		updateAppearance();
 		colorChooser.setPreviewPanel(previewPanelInit());
 		colorChooser.getSelectionModel().addChangeListener(this);
 		newColor = colorChooser.getColor();
@@ -72,7 +83,6 @@ public class Appearance extends JPanel implements ChangeListener, ActionListener
 	}
 	
 	private JPanel previewPanelInit() {
-		
 		JPanel westPane = new JPanel();
 		westPane.setLayout(new BorderLayout());
 		westPane.setOpaque(false);
@@ -153,13 +163,14 @@ public class Appearance extends JPanel implements ChangeListener, ActionListener
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-
-		if(e.getActionCommand().equals("Set Background")) {	previewPanel.setBackground(newColor); }
-		else if(e.getActionCommand().equals("Set Font Color")) { textPreview.setForeground(newColor); }
+		if(e.getActionCommand().equals("Set Background")) {	
+			previewPanel.setBackground(newColor);
+		}
+		else if(e.getActionCommand().equals("Set Font Color")) {
+			textPreview.setForeground(newColor); 
+		}
 		else if(e.getActionCommand().equals("Font Chooser")) {
 			String fontName = (String) fontChooser.getSelectedItem();
-			checkBold.setSelected(false);
-			checkItalic.setSelected(false);
 			newFont = new Font(fontName, (checkBold.isSelected()? Font.BOLD: 0) | (checkItalic.isSelected()? Font.ITALIC: 0), 12);
 			textPreview.setFont(newFont);
 		}
@@ -172,6 +183,8 @@ public class Appearance extends JPanel implements ChangeListener, ActionListener
 			textPreview.setFont(newFont);
 		}
 		saveAttributes();
+		btnApply.setEnabled(!initAttributes[index].equals(currentAttributes[index]));
+		btnDefault.setEnabled(!currentAttributes[index].equals(defaultAttributes[index]));
 	}
 	
 	@Override
@@ -188,12 +201,12 @@ public class Appearance extends JPanel implements ChangeListener, ActionListener
 	}
 	
 	private void updatePreview() {
-		Enumeration<?> keys = attributes[index].getAttributeNames();
+		Enumeration<?> keys = currentAttributes[index].getAttributeNames();
 		String family = "";
 		boolean bold = false, italic = false;
 		while(keys.hasMoreElements()) {
 			String name = (String)keys.nextElement();
-			String value = (String)attributes[index].getAttribute(name);
+			String value = (String)currentAttributes[index].getAttribute(name);
 			if(name.endsWith("background")) previewPanel.setBackground(Color.decode(value));
 			else if(name.endsWith("foreground")) textPreview.setForeground(Color.decode(value));
 			else if(name.endsWith("family")) family = value;
@@ -205,48 +218,97 @@ public class Appearance extends JPanel implements ChangeListener, ActionListener
 	}
 	
 	private void updateFontSettings() {
-		fontChooser.setSelectedItem((String) newFont.getFontName());
 		checkBold.setSelected(newFont.isBold());
 		checkItalic.setSelected(newFont.isItalic());
+		fontChooser.setSelectedItem((String) newFont.getFamily());
 	}
 	
 	void apply() {
-		
+		saveProperties();
+		properties.saveProperties();
+		btnApply.setEnabled(initAttributes[index].equals(currentAttributes[index]));
 		parent.updateAppearance(list.getSelectedValue());
-		saveAttributes();
+		updateAppearance();
 	}
 	
 	void setDefault() {
-		
+		Enumeration<?> keys = currentAttributes[index].getAttributeNames();
+		while(keys.hasMoreElements()) {
+			String name = (String)keys.nextElement();
+			properties.remove(name);
+		}
+		currentAttributes[index] = new SimpleAttributeSet();
 		updatePreview();
 		updateFontSettings();
+		properties.saveProperties();
+		btnDefault.setEnabled(!currentAttributes[index].equals(defaultAttributes[index]));
+		parent.updateAppearance(list.getSelectedValue());
+		updateAppearance();
 	}
 	
 	private void saveAttributes() {
-		Enumeration<?> keys = attributes[index].getAttributeNames();
+		Enumeration<?> keys = currentAttributes[index].getAttributeNames();
 		while(keys.hasMoreElements()) {
 			String name = (String)keys.nextElement();
-			if(name.endsWith("background")) attributes[index].addAttribute(name, colorToHex(previewPanel.getBackground()));
-			else if(name.endsWith("foreground")) attributes[index].addAttribute(name, colorToHex(textPreview.getForeground()));
-			else if(name.endsWith("family")) attributes[index].addAttribute(name, newFont.getFamily());
-			else if(name.endsWith("bold")) attributes[index].addAttribute(name, newFont.isBold()? "true": "false");
-			else if(name.endsWith("italic")) attributes[index].addAttribute(name, newFont.isItalic()? "true": "false");
+			if(name.endsWith("background")) {
+				currentAttributes[index].addAttribute(name, colorToHex(previewPanel.getBackground()));
+			}
+			else if(name.endsWith("foreground")) {
+				currentAttributes[index].addAttribute(name, colorToHex(textPreview.getForeground()));
+			}
+			else if(name.endsWith("family")) {
+				currentAttributes[index].addAttribute(name, newFont.getFamily());
+			}
+			else if(name.endsWith("bold")) {
+				currentAttributes[index].addAttribute(name, newFont.isBold()? "true": "false");
+			}
+			else if(name.endsWith("italic")) {
+				currentAttributes[index].addAttribute(name, newFont.isItalic()? "true": "false");
+			}
 		}
+	}
+	
+	private void saveProperties() {
+		Enumeration<?> keys = currentAttributes[index].getAttributeNames();
+		while(keys.hasMoreElements()) {
+			String name = (String)keys.nextElement();
+			if(name.endsWith("background")) {
+				properties.put(name, colorToHex(previewPanel.getBackground()));
+			}
+			else if(name.endsWith("foreground")) {
+				properties.put(name, colorToHex(textPreview.getForeground()));
+			}
+			else if(name.endsWith("family")) {
+				properties.put(name, newFont.getFamily());
+			}
+			else if(name.endsWith("bold")) {
+				properties.put(name, newFont.isBold()? "true": "false");
+			}
+			else if(name.endsWith("italic")) {
+				properties.put(name, newFont.isItalic()? "true": "false");
+			}
+		}
+		initAttributes[index] = new SimpleAttributeSet(currentAttributes[index]);
 	}
 	
 	private void initAttributes() {
-		attributes = new SimpleAttributeSet[4];
-		for(int i=0; i<4; i++) attributes[i] = new SimpleAttributeSet();
+		initAttributes = new SimpleAttributeSet[4];
+		for(int i=0; i<4; i++) initAttributes[i] = new SimpleAttributeSet();
 		String[] keys = AppProperties.KEYS;
 		for(int i=0; i<keys.length; i++) {
-			if(keys[i].startsWith("main")) attributes[0].addAttribute(keys[i], properties.getProperty(keys[i]));
-			else if(keys[i].startsWith("welcome")) attributes[1].addAttribute(keys[i], properties.getProperty(keys[i]));
-			else if(keys[i].startsWith("table")) attributes[2].addAttribute(keys[i], properties.getProperty(keys[i]));
-			else if(keys[i].startsWith("highlight")) attributes[3].addAttribute(keys[i], properties.getProperty(keys[i]));
+			if(keys[i].startsWith("main")) initAttributes[0].addAttribute(keys[i], properties.getProperty(keys[i]));
+			else if(keys[i].startsWith("welcome")) initAttributes[1].addAttribute(keys[i], properties.getProperty(keys[i]));
+			else if(keys[i].startsWith("table")) initAttributes[2].addAttribute(keys[i], properties.getProperty(keys[i]));
+			else if(keys[i].startsWith("highlight")) initAttributes[3].addAttribute(keys[i], properties.getProperty(keys[i]));
 		}
+		currentAttributes = new SimpleAttributeSet[4];
+		for(int i=0; i<initAttributes.length; i++) {
+			currentAttributes[i] = new SimpleAttributeSet(initAttributes[i]);
+		}
+		defaultAttributes = new SimpleAttributeSet[4];
 	}
 	
-	private String colorToHex(Color color) { 
+	public String colorToHex(Color color) { 
 		String hex = Integer.toHexString(color.getRGB() & 0xffffff);
 	    while(hex.length() < 6) {
 	    	hex = "0" + hex;

@@ -244,6 +244,7 @@ public class TableModelComboHeader extends AbstractTableModel implements TableMo
 	private void comboSelected(int comboNumber, String selection) {
 		dataBase = application.getDataBase();
 		tableModel = dataBase.getTableModel();
+		table.clearSelection();
 		
 		int size, size2 = 0;
 		int numOfVar = tableModel.getColumnCount()-1;

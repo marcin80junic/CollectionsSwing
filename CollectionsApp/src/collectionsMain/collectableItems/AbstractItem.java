@@ -11,6 +11,8 @@ public abstract class AbstractItem implements Collectable<AbstractItem>, Seriali
 	protected int year;
 	protected int index;
 	
+	protected AbstractItem() {  }
+	
 	protected AbstractItem(String author, String title, String genre, int year) {
 		this.author = author;
 		this.title = title;

@@ -1,6 +1,8 @@
 package collectionsMain.table;
 
 import java.awt.Component;
+import java.awt.Insets;
+
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.TableCellRenderer;
@@ -19,6 +21,11 @@ public class TableRendererCollection extends JTextField implements TableCellRend
 		super();
 		setBorder(null);
 		setOpaque(true);
+	}
+	
+	@Override
+	public Insets getInsets() {
+		return new Insets(0,1,0,1);
 	}
 
 	@Override

@@ -9,6 +9,7 @@ public class Book extends AbstractItem implements Comparable<Book> {
 	private static final long serialVersionUID = 1L;
 	private String series;
 	
+	public Book() {   }
 	
 	public Book(String author, String title, String series, String genre, int year) {
 		super(author, title, genre, year);

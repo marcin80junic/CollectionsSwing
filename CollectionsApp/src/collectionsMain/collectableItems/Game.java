@@ -9,6 +9,9 @@ public class Game extends AbstractItem implements Comparable<Game> {
 	private static final long serialVersionUID = 1L;
 	private String series;
 	
+	
+	public Game() {   }
+	
 	public Game (String title, String series, String genre, String author, int year) {
 		super(author, title, genre, year);
 		this.series = series;

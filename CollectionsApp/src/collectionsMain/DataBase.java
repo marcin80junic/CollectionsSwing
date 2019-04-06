@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import javax.swing.ImageIcon;
@@ -18,7 +19,6 @@ import javax.swing.event.TableColumnModelEvent;
 import javax.swing.event.TableColumnModelListener;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
-
 import collectionsMain.collectableItems.AbstractItem;
 import collectionsMain.collectableItems.Collectable;
 import collectionsMain.table.TableHeaderRenderer;
@@ -57,7 +57,20 @@ public class DataBase <T extends Collectable<? extends AbstractItem>> extends Ar
 	}
 	
 	public void instantiateType(T item) {
+		
 		this.item = item;
+		tableModel = new TableModelCollection<T>(this, item.getTableHeaders());
+	}
+
+	@SuppressWarnings("unchecked")
+	public void instantiateType(String className) {
+		try {
+			Class<?> clazz = Class.forName(className);
+			item = (T) clazz.getDeclaredConstructor().newInstance();
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException |
+				InvocationTargetException | NoSuchMethodException | SecurityException e) {
+			e.printStackTrace();
+		}
 		tableModel = new TableModelCollection<T>(this, item.getTableHeaders());
 	}
 	

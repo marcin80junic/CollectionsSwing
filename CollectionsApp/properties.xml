@@ -2,7 +2,24 @@
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
 <comment>properties</comment>
-<entry key="game.column.sizes">233,188,140,157,70</entry>
-<entry key="audiocd.column.sizes">225,252,187,58,70</entry>
-<entry key="book.column.sizes">200,212,190,119,71</entry>
+<entry key="table.font.italic">false</entry>
+<entry key="main.font.family">Nyala</entry>
+<entry key="table.foreground">#000000</entry>
+<entry key="welcome.font.italic">false</entry>
+<entry key="main.font.italic">false</entry>
+<entry key="welcome.background">#ffff33</entry>
+<entry key="highlight.font.bold">true</entry>
+<entry key="main.font.bold">false</entry>
+<entry key="table.font.family">Serif</entry>
+<entry key="highlight.background">#66cc00</entry>
+<entry key="welcome.foreground">#333333</entry>
+<entry key="welcome.font.bold">true</entry>
+<entry key="highlight.foreground">#000000</entry>
+<entry key="main.foreground">#333333</entry>
+<entry key="welcome.font.family">Shruti</entry>
+<entry key="highlight.font.italic">true</entry>
+<entry key="highlight.font.family">Serif</entry>
+<entry key="main.background">#ff0033</entry>
+<entry key="table.font.bold">false</entry>
+<entry key="table.background">#009999</entry>
 </properties>
