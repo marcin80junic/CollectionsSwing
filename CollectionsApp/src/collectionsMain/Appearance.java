@@ -13,7 +13,12 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Enumeration;
+import java.util.Properties;
+
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.Icon;
@@ -59,7 +64,7 @@ public class Appearance extends JPanel implements ChangeListener, ActionListener
 		initAttributes();
 		add(colorChooserInit());
 		add(fontPanelInit());
-		btnApply.setEnabled(!initAttributes[index].equals(currentAttributes[index]));
+		btnApply.setEnabled(false);
 		btnDefault.setEnabled(!currentAttributes[index].equals(defaultAttributes[index]));
 	}
 	
@@ -226,7 +231,8 @@ public class Appearance extends JPanel implements ChangeListener, ActionListener
 	void apply() {
 		saveProperties();
 		properties.saveProperties();
-		btnApply.setEnabled(initAttributes[index].equals(currentAttributes[index]));
+		btnApply.setEnabled(!initAttributes[index].equals(currentAttributes[index]));
+		btnDefault.setEnabled(!currentAttributes[index].equals(defaultAttributes[index]));
 		parent.updateAppearance(list.getSelectedValue());
 		updateAppearance();
 	}
@@ -235,15 +241,12 @@ public class Appearance extends JPanel implements ChangeListener, ActionListener
 		Enumeration<?> keys = currentAttributes[index].getAttributeNames();
 		while(keys.hasMoreElements()) {
 			String name = (String)keys.nextElement();
-			properties.remove(name);
+			properties.remove(name);	
 		}
-		currentAttributes[index] = new SimpleAttributeSet();
+		currentAttributes[index] = new SimpleAttributeSet(defaultAttributes[index]);
 		updatePreview();
 		updateFontSettings();
-		properties.saveProperties();
 		btnDefault.setEnabled(!currentAttributes[index].equals(defaultAttributes[index]));
-		parent.updateAppearance(list.getSelectedValue());
-		updateAppearance();
 	}
 	
 	private void saveAttributes() {
@@ -293,7 +296,12 @@ public class Appearance extends JPanel implements ChangeListener, ActionListener
 	
 	private void initAttributes() {
 		initAttributes = new SimpleAttributeSet[4];
-		for(int i=0; i<4; i++) initAttributes[i] = new SimpleAttributeSet();
+		currentAttributes = new SimpleAttributeSet[4];
+		defaultAttributes = new SimpleAttributeSet[4];
+		for(int i=0; i<4; i++) {
+			initAttributes[i] = new SimpleAttributeSet();
+			defaultAttributes[i] = new SimpleAttributeSet();
+		}
 		String[] keys = AppProperties.KEYS;
 		for(int i=0; i<keys.length; i++) {
 			if(keys[i].startsWith("main")) initAttributes[0].addAttribute(keys[i], properties.getProperty(keys[i]));
@@ -301,11 +309,23 @@ public class Appearance extends JPanel implements ChangeListener, ActionListener
 			else if(keys[i].startsWith("table")) initAttributes[2].addAttribute(keys[i], properties.getProperty(keys[i]));
 			else if(keys[i].startsWith("highlight")) initAttributes[3].addAttribute(keys[i], properties.getProperty(keys[i]));
 		}
-		currentAttributes = new SimpleAttributeSet[4];
-		for(int i=0; i<initAttributes.length; i++) {
+		for(int i=0; i<4; i++) {
 			currentAttributes[i] = new SimpleAttributeSet(initAttributes[i]);
 		}
-		defaultAttributes = new SimpleAttributeSet[4];
+		Properties defaults = new Properties();
+		File def = new File("defaults.xml");
+		if(def.isFile()) {
+			try(FileInputStream fis = new FileInputStream(def)){
+				defaults.loadFromXML(fis);
+			} catch (IOException e) { e.printStackTrace(); }
+		}
+		String[] defKeys = AppProperties.KEYS;
+		for(int i=0; i<defKeys.length; i++) {
+			if(defKeys[i].startsWith("main")) defaultAttributes[0].addAttribute(defKeys[i], defaults.getProperty(keys[i]));
+			else if(defKeys[i].startsWith("welcome")) defaultAttributes[1].addAttribute(defKeys[i], defaults.getProperty(keys[i]));
+			else if(defKeys[i].startsWith("table")) defaultAttributes[2].addAttribute(defKeys[i], defaults.getProperty(keys[i]));
+			else if(defKeys[i].startsWith("highlight")) defaultAttributes[3].addAttribute(defKeys[i], defaults.getProperty(keys[i]));
+		}	
 	}
 	
 	public String colorToHex(Color color) { 

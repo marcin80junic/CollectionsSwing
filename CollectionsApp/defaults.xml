@@ -9,14 +9,14 @@
 <entry key="book.column.sizes">200,212,190,120,70</entry>
 <entry key="main.font.italic">false</entry>
 <entry key="welcome.background">#d6d9df</entry>
-<entry key="table.font.family">serif</entry>
+<entry key="table.font.family">Serif</entry>
 <entry key="welcome.font.bold">true</entry>
 <entry key="highlight.foreground">#ffffff</entry>
 <entry key="book.file.path">books.dat</entry>
 <entry key="game.file.path">games.dat</entry>
 <entry key="table.font.bold">false</entry>
 <entry key="table.font.italic">false</entry>
-<entry key="main.font.family">serif</entry>
+<entry key="main.font.family">Serif</entry>
 <entry key="welcome.font.italic">false</entry>
 <entry key="highlight.font.bold">true</entry>
 <entry key="main.font.bold">false</entry>
@@ -24,10 +24,10 @@
 <entry key="welcome.foreground">#000000</entry>
 <entry key="main.foreground">#000000</entry>
 <entry key="game.column.sizes">225,200,140,157,70</entry>
-<entry key="welcome.font.family">serif</entry>
+<entry key="welcome.font.family">Serif</entry>
 <entry key="highlight.font.italic">true</entry>
 <entry key="audiocd.file.path">music.dat</entry>
-<entry key="highlight.font.family">serif</entry>
+<entry key="highlight.font.family">Serif</entry>
 <entry key="main.background">#d6d9df</entry>
 <entry key="table.background">#ffffff</entry>
 </properties>

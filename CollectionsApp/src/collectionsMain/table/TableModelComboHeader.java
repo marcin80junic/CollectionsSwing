@@ -15,7 +15,6 @@ import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
-
 import collectionsMain.CollectionsApp;
 import collectionsMain.DataBase;
 import collectionsMain.collectableItems.AbstractItem;

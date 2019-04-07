@@ -18,7 +18,7 @@ public class TableHeaderRenderer extends JPanel implements TableCellRenderer {
 
 	private static final long serialVersionUID = 1L;
 	private JLabel title, icon;
-	private SorterIcon ascIcon, descIcon;
+	private Icon ascIcon, descIcon;
 	private TableModelCollection<?> tableModel;
 	private boolean isAsc;
 

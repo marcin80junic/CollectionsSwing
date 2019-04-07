@@ -25,7 +25,7 @@ public class TableRendererCollection extends JTextField implements TableCellRend
 	
 	@Override
 	public Insets getInsets() {
-		return new Insets(0,1,0,1);
+		return new Insets(0,1,0,0);
 	}
 
 	@Override
