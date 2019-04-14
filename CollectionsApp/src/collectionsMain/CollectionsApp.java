@@ -544,30 +544,22 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 	
 	private void detailPaneUpdate(boolean selectionEmpty) {
 		detailItemPanel.removeAll();
-		if(homeFlag) toolPane.removeAll();
-		else toolPane.add(detailToolBar);
+		if(homeFlag) {
+			toolPane.removeAll();
+		}
+		else {
+			toolPane.add(detailToolBar);
+		}
 		detailTitle.setText(homeFlag? "Welcome...": dataBase.getName()+"s Collection");
 		if(!homeFlag && selectionEmpty) {
 			CollectionsTree tree = new CollectionsTree(tableModel);
-		//	tree.setBackground(tableBackground);
+			tree.setBackground(tableBackground);
 			detailItemPanel.add(tree);
 		}
-		else if(!selectionEmpty) {
-			if (booksFlag) {
-				Book book = (Book) tableModel.getItem(table.getSelectedRow());
-				BookStyledDocument bsd = new BookStyledDocument(book);
-				titleText.setStyledDocument(bsd);
-				detailItemPanel.add(titleText);
-			}
-			else if (musicFlag) {
-				
-			}
-			else if (gamesFlag) {
-				
-			}
-			else if (moviesFlag) {
-				
-			}
+		else if(!homeFlag && !selectionEmpty) {
+			BookStyledDocument bsd = new BookStyledDocument(dataBase, table, titleText.getWidth());
+			titleText.setStyledDocument(bsd);
+			detailItemPanel.add(titleText);
 		}
 		detailItemPanel.revalidate();
 		detailItemPanel.repaint();
@@ -695,7 +687,6 @@ public class CollectionsApp extends JFrame implements ListSelectionListener  {
 	public static Color getHighlightBackground() { return highlightBackground; }
 	public static Color getHighlightForeground() { return highlightForeground; }
 	public static Font getHighlightFont() { return highlightFont; }
-	
 	
 	private void resetBtnFlags() {
 		if(homeFlag) btnHome.setBorder(raised);

@@ -1,12 +1,16 @@
 package mediaBooks;
 
-
+import javax.swing.JTable;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 
-import collectionsMain.collectableItems.Book;
+import collectionsMain.DataBase;
+import collectionsMain.ImageLoader;
+import collectionsMain.collectableItems.Collectable;
+import collectionsMain.table.TableModelCollection;
 
 
 public class BookStyledDocument extends DefaultStyledDocument {
@@ -14,15 +18,15 @@ public class BookStyledDocument extends DefaultStyledDocument {
 	
 	private static final long serialVersionUID = 1L;
 	private SimpleAttributeSet author, series, title, centered;
-	private final Book book;
+	private Collectable<?> item;
+	private ImageLoader il;
 	
-	
-	public BookStyledDocument(Book book){
-		
-		this.book = book;
+	public BookStyledDocument(DataBase<?> db, JTable table, int width){
+		TableModelCollection<?> model = (TableModelCollection<?>) table.getModel();
+		item = model.getItem(table.getSelectedRow());
+		il = new ImageLoader(db, item, 150, 150, width);
 		initAttributes();
 		initText();
-	
 	}
 	
 	private void initAttributes() {
@@ -55,19 +59,19 @@ public class BookStyledDocument extends DefaultStyledDocument {
 	
 	
 	private void initText() {
-		
-		String text = "";
 		try {
-			insertString(0, book.getAuthor()+"\n", author);
-			insertString(getLength(), book.getTitle()+"\n", title);
-			insertString(getLength(), book.getSeries()+"\n", series);
-			text = getText(0, getLength());
-		} catch (BadLocationException e) { e.printStackTrace(); }
-		
-		for(int i=0; i<getLength(); i++) {
-			if(text.charAt(i) == '\n') {
-				setParagraphAttributes(i, 0, centered, false);
-			}
+			insertString(0, item.getAuthor()+"\n", author);
+			insertString(getLength(), item.getTitle()+"\n", title);
+			insertString(getLength(), item.getSeries()+"\n", series);
+
+			Style style = addStyle("StyleName", null);
+			StyleConstants.setComponent(style, il);
+			insertString(getLength(), "s", style);
+
+			setParagraphAttributes(0, getLength(), centered, false);
+
+		} catch (BadLocationException e) {
+			e.printStackTrace(); 
 		}
 	}
 

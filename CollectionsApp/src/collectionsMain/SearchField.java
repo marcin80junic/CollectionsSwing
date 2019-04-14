@@ -77,7 +77,7 @@ public class SearchField extends JTextField implements FocusListener, KeyListene
         }
         setMargin(new Insets(0, 3, 0, textX));
         
-        if (!this.hasFocus() && this.getText().equals("")) {
+        if (!hasFocus() && getText().equals("")) {
             int height = this.getHeight();
             Font prev = g.getFont();
             Font italic = prev.deriveFont(Font.ITALIC);

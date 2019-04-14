@@ -10,6 +10,7 @@ public abstract class AbstractItem implements Collectable<AbstractItem>, Seriali
 	protected String genre;
 	protected int year;
 	protected int index;
+	protected String photoPath;
 	
 	protected AbstractItem() {  }
 	
@@ -40,6 +41,9 @@ public abstract class AbstractItem implements Collectable<AbstractItem>, Seriali
 
 	@Override
 	public int getID() { return year; }
+	
+	@Override
+	public String getPhotoPath() { return photoPath; }
 
 	@Override
 	public void setAuthor(String author) { this.author = author; }
@@ -62,5 +66,6 @@ public abstract class AbstractItem implements Collectable<AbstractItem>, Seriali
 	@Override
 	public void setID(int index) { this.index = index; }	
 
-	
+	@Override
+	public void setPhotoPath(String path) { photoPath = path; }
 }

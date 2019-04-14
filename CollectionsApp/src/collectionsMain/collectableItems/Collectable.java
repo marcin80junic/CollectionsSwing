@@ -14,6 +14,7 @@ public interface Collectable<T> {
 	int[] getDiscs();
 	int getYear();
 	int getID();
+	String getPhotoPath();
 	
 	T createItem(String[] data);
 	void editItem(String[] newData);
@@ -24,6 +25,7 @@ public interface Collectable<T> {
 	void setDiscs(int[] discs);
 	void setYear(int year);
 	void setID(int id);
+	void setPhotoPath(String path);
 	
 	String[] getGenres();
 	String[] getTableHeaders();
