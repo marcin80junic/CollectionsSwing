@@ -22,10 +22,12 @@ import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
+import javax.swing.SwingWorker;
+import javax.swing.UIManager;
 import collectionsMain.collectableItems.Collectable;
 import collectionsMain.fileDialog.CollectionsFileFilter;
 
-public class ImageLoader extends Component implements Icon, FocusListener, MouseListener, MouseMotionListener{
+public class ImageLoader extends Component implements Icon, FocusListener, MouseListener, MouseMotionListener {
 	
 	private static final long serialVersionUID = 1L;
 	private DataBase<?> dataBase;
@@ -49,10 +51,11 @@ public class ImageLoader extends Component implements Icon, FocusListener, Mouse
 		indentTop = 10;
 		setFocusable(true);
 		if(!imgDir.isDirectory()) imgDir.mkdir();
-		temp = "";
-		path = item.getPhotoPath();
+		temp = path = item.getPhotoPath();
 		path = (path==null)? "": path;
-		if(!path.equals("")) loadImage(new File(path));
+		if(!path.equals("")) {
+			new ImageLoaderWorker().execute();
+		}
 		initIcons();
 		addFocusListener(this);
 		addMouseListener(this);
@@ -73,9 +76,7 @@ public class ImageLoader extends Component implements Icon, FocusListener, Mouse
 				return;
 			}
 			isLoaded = true;
-			System.out.println(path+", "+temp);
 			if(!path.equals(temp) && !temp.equals("")) {
-				System.out.println("ins");
 				item.setPhotoPath(path=temp);
 				dataBase.saveToFile();
 			}
@@ -97,13 +98,19 @@ public class ImageLoader extends Component implements Icon, FocusListener, Mouse
 		}
 		BufferedImage outputImage = new BufferedImage(scaledWidth, scaledHeight, image.getType());	
 		Graphics2D g2d = outputImage.createGraphics();
-		g2d.drawImage(image, 1, 1, scaledWidth, scaledHeight, this);
+		g2d.drawImage(image, 0, 0, scaledWidth, scaledHeight, this);
 		g2d.dispose();
-		String fileName = imgFile.getName();
-		String ext = fileName.substring(fileName.lastIndexOf(".") + 1);
-		temp = imgDir.getPath()+"/"+fileName;
-		ImageIO.write(outputImage, ext, new File(temp));
-		image = outputImage;
+		temp = imgDir.getPath()+"/"+imgFile.getName();
+		saveImage(outputImage, temp);
+	}
+	
+	private void saveImage(BufferedImage newImage, String newPath) {
+		image = newImage;
+		temp = newPath;
+		String extension = path.substring(path.lastIndexOf(".") + 1);
+		try {
+			ImageIO.write(image, extension, new File(temp));
+		} catch (IOException e) { e.printStackTrace(); }
 	}
 	
 	private void initIcons() {
@@ -114,8 +121,9 @@ public class ImageLoader extends Component implements Icon, FocusListener, Mouse
 	}
 	
 	public void paint(Graphics g) {
-		g.drawRect(0, 0, w, h);
 		if(!isLoaded) {
+			g.setColor(UIManager.getColor("textInactiveText"));
+			g.drawRect(0, 0, w, h);
 			String def = "Click to upload photo";
 			FontMetrics fm = g.getFontMetrics();
 			Rectangle2D rect = fm.getStringBounds(def, g);
@@ -134,6 +142,8 @@ public class ImageLoader extends Component implements Icon, FocusListener, Mouse
 			g.fillRect(1, 1, w-1, h-1);
 		}
 		if(hasFocus() && isLoaded) {
+			g.setColor(UIManager.getColor("textInactiveText"));
+			g.drawRect(0, 0, w, h);
 			Icon[] icons = {open, remove, rotateLeft, rotateRight};
 			for(int i=0; i<icons.length; i++) {
 				icons[i].paintIcon(this, g, (inset + i*icons[i].getIconWidth() + gap + gap*i), getHeight() - open.getIconHeight()-inset*2);
@@ -153,7 +163,7 @@ public class ImageLoader extends Component implements Icon, FocusListener, Mouse
 	            dest.setRGB(x,y,src.getRGB(y,a++));
 	        }
 	    }
-	    image = dest;
+	    saveImage(dest, path);
 	    repaint();
 	}
 	
@@ -171,7 +181,7 @@ public class ImageLoader extends Component implements Icon, FocusListener, Mouse
 	        }
 	        b--;
 	    }
-	    image = dest;
+	    saveImage(dest, path);
 	    repaint();
 	}
 	
@@ -198,9 +208,11 @@ public class ImageLoader extends Component implements Icon, FocusListener, Mouse
 		chooser.setFileFilter(new CollectionsFileFilter("Image files", "jpg", "png", "gif"));
 		int option = chooser.showDialog(null, "Load");
 		if(option == JFileChooser.APPROVE_OPTION) {
-			loadImage(chooser.getSelectedFile());
+			temp = chooser.getSelectedFile().getPath();
+			new ImageLoaderWorker().execute();
 		}
 	}
+	
 	private void removeImage() { 
 		image = null;
 		isLoaded = false;
@@ -220,7 +232,6 @@ public class ImageLoader extends Component implements Icon, FocusListener, Mouse
 	@Override
 	public Dimension getPreferredSize() { return new Dimension(getWidth()+getBounds().x, getHeight()+getBounds().y); }
 	
-	
 	@Override
 	public void paintIcon(Component c, Graphics g, int x, int y) { if(image != null) g.drawImage(image, x, y, c); }
 	@Override
@@ -233,7 +244,6 @@ public class ImageLoader extends Component implements Icon, FocusListener, Mouse
 		if(image != null) return image.getHeight();
 		return 0;
 	}	
-	
 	
 	@Override
 	public void mouseDragged(MouseEvent e) { }
@@ -253,7 +263,6 @@ public class ImageLoader extends Component implements Icon, FocusListener, Mouse
 			}
 	}
 
-	
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		Point point = new Point(e.getX(), e.getY());
@@ -281,14 +290,22 @@ public class ImageLoader extends Component implements Icon, FocusListener, Mouse
 	public void focusGained(FocusEvent e) { repaint(); }
 	@Override
 	public void focusLost(FocusEvent e) { repaint(); }
-	
-	
+		
 	public ImageIcon createImageIcon(String path, String description) {
 		URL imgURL = getClass().getResource(path);
 		if (imgURL != null) {
 			return new ImageIcon(imgURL, description);
 		} else {
 			System.err.println("Couldn't find file: " + path);
+			return null;
+		}
+	}
+	
+	class ImageLoaderWorker extends SwingWorker <Void, Void> {
+		@Override
+		protected Void doInBackground() throws Exception {
+			loadImage(new File(temp));
+			repaint();
 			return null;
 		}
 	}
